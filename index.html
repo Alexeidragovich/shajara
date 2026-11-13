@@ -1,0 +1,4247 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shajara - شجرة الدومينات</title>
+  <meta name="description" content="أداة استطلاع وصيد ثغرات تعمل بدون إنترنت لتصوير الدومينات والسب دومينات ونقاط النهاية على شكل شجرة عائلية تفاعلية." />
+  <meta property="og:title" content="Shajara - شجرة الدومينات" />
+  <meta property="og:description" content="أداة استطلاع وصيد ثغرات تعمل بدون إنترنت لتصوير الدومينات والسب دومينات ونقاط النهاية على شكل شجرة عائلية تفاعلية." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F1115'/%3E%3Cpath d='M32 12v14m0 0-14 14m14-14 14 14M18 40v12m28-12v12' stroke='%232DD4BF' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='12' r='5' fill='%232DD4BF'/%3E%3Ccircle cx='18' cy='52' r='5' fill='%2322C55E'/%3E%3Ccircle cx='46' cy='52' r='5' fill='%23EF4444'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #0F1115;
+      --surface: #1A1D24;
+      --surface-elevated: #21252F;
+      --surface-inset: #13161C;
+      --border: #272C38;
+      --border-hover: #384052;
+      --text: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --teal: #2DD4BF;
+      --teal-bg: rgba(45, 212, 191, 0.12);
+      --teal-border: rgba(45, 212, 191, 0.35);
+      --yellow: #EAB308;
+      --yellow-bg: rgba(234, 179, 8, 0.12);
+      --red: #EF4444;
+      --red-bg: rgba(239, 68, 68, 0.12);
+      --red-border: rgba(239, 68, 68, 0.45);
+      --green: #22C55E;
+      --green-bg: rgba(34, 197, 94, 0.12);
+      --gray: #94A3B8;
+      --gray-bg: rgba(148, 163, 184, 0.12);
+      --tree-line: #323949;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --font-sans: system-ui, -apple-system, 'Segoe UI', Tahoma, Arial, sans-serif;
+      --font-mono: ui-monospace, 'SFMono-Regular', 'Cascadia Code', 'Fira Code', Menlo, Monaco, Consolas, monospace;
+      --transition: 160ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      font-size: 15px;
+      overflow-x: hidden;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 2px;
+    }
+
+    .tabular {
+      font-variant-numeric: tabular-nums;
+      font-family: var(--font-mono);
+    }
+
+    .ltr {
+      direction: ltr;
+      unicode-bidi: isolate;
+      text-align: left;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Buttons & Controls */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 40px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background-color: var(--surface);
+      color: var(--text);
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      text-decoration: none;
+      transition: background-color var(--transition), border-color var(--transition), color var(--transition), transform var(--transition);
+    }
+
+    .btn:hover {
+      background-color: var(--surface-elevated);
+      border-color: var(--border-hover);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background-color: var(--teal);
+      border-color: var(--teal);
+      color: #081214;
+    }
+
+    .btn-primary:hover {
+      background-color: #26BCA9;
+      border-color: #26BCA9;
+    }
+
+    .btn-danger {
+      background-color: transparent;
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #FCA5A5;
+    }
+
+    .btn-danger:hover {
+      background-color: var(--red-bg);
+      border-color: var(--red);
+      color: #FECACA;
+    }
+
+    .btn-sm {
+      min-height: 36px;
+      padding: 6px 11px;
+      font-size: 12.5px;
+    }
+
+    .btn-ghost {
+      background-color: transparent;
+      border-color: transparent;
+      color: var(--text-secondary);
+    }
+
+    .btn-ghost:hover {
+      background-color: var(--surface-elevated);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    /* Top Bar */
+    .topbar {
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--border);
+      width: 100%;
+    }
+
+    .topbar-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .brand-mark {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+
+    .brand-sub {
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1 1 240px;
+      max-width: 420px;
+      min-width: 0;
+    }
+
+    .search-input {
+      width: 100%;
+      min-height: 40px;
+      padding: 8px 36px 8px 34px;
+      background-color: var(--surface-inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 14px;
+      transition: border-color var(--transition);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--teal);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      width: 16px;
+      height: 16px;
+    }
+
+    .search-clear {
+      position: absolute;
+      left: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    .search-clear:hover {
+      color: var(--text);
+      background-color: var(--surface-elevated);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Main Workspace Layout */
+    .workspace {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* Sidebar (Projects) */
+    .sidebar {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .sidebar-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .project-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .project-item-btn {
+      width: 100%;
+      min-height: 44px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background-color: transparent;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      cursor: pointer;
+      text-align: right;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background-color var(--transition), border-color var(--transition), color var(--transition);
+    }
+
+    .project-item-btn:hover {
+      background-color: var(--surface-elevated);
+      color: var(--text);
+    }
+
+    .project-item-btn.active {
+      background-color: var(--teal-bg);
+      border-color: var(--teal-border);
+      color: var(--teal);
+    }
+
+    .project-name-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .project-meta-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+
+    .project-item-btn.active .project-meta-count {
+      color: var(--teal);
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background-color: var(--border);
+      margin: 0;
+      border: none;
+    }
+
+    .sidebar-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Mobile Project Bar */
+    .mobile-project-bar {
+      display: none;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .mobile-project-select-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 180px;
+      min-width: 0;
+    }
+
+    .select-control {
+      min-height: 40px;
+      padding: 6px 10px;
+      background-color: var(--surface-inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .select-control:focus {
+      outline: none;
+      border-color: var(--teal);
+    }
+
+    /* Main Content Column */
+    .main-area {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Project Context Header */
+    .project-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .project-heading-group {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .project-heading {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .project-submeta {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .project-actions-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .stat-cell {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border-left: 1px solid var(--border);
+    }
+
+    .stat-cell:last-child {
+      border-left: none;
+    }
+
+    .stat-label {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+    }
+
+    .stat-total .stat-value { color: var(--teal); }
+    .stat-red .stat-value { color: var(--red); }
+    .stat-yellow .stat-value { color: var(--yellow); }
+    .stat-green .stat-value { color: var(--green); }
+
+    /* Filter & Tree Toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    .filter-tab {
+      min-height: 36px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background-color var(--transition), color var(--transition);
+    }
+
+    .filter-tab:hover {
+      color: var(--text);
+      background-color: var(--surface-elevated);
+    }
+
+    .filter-tab.active {
+      background-color: var(--surface-elevated);
+      color: var(--teal);
+      box-shadow: inset 0 0 0 1px var(--teal-border);
+    }
+
+    .tree-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ============================================================
+       SPLIT WORKSPACE: NESTED TREE + D3 SIDE PANE
+       ============================================================ */
+    .tree-split-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(380px, 0.95fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .tree-split-layout.d3-expanded {
+      grid-template-columns: 1fr;
+    }
+
+    .tree-split-layout.d3-expanded .d3-pane {
+      order: -1;
+      position: static;
+      height: 620px;
+      max-height: none;
+    }
+
+    .d3-pane {
+      position: sticky;
+      top: 16px;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 150px);
+      min-height: 460px;
+      max-height: 760px;
+      overflow: hidden;
+    }
+
+    .d3-pane-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      background-color: var(--surface);
+    }
+
+    .d3-pane-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .d3-pane-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .d3-pane-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .d3-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .d3-tool-btn {
+      min-width: 34px;
+      min-height: 34px;
+      padding: 4px 9px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background-color: var(--surface-inset);
+      color: var(--text-secondary);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      transition: background-color var(--transition), border-color var(--transition), color var(--transition);
+    }
+
+    .d3-tool-btn:hover {
+      background-color: var(--surface-elevated);
+      border-color: var(--border-hover);
+      color: var(--text);
+    }
+
+    .d3-tool-btn.active {
+      background-color: var(--teal-bg);
+      border-color: var(--teal-border);
+      color: var(--teal);
+    }
+
+    .d3-canvas-wrap {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
+      background-color: var(--surface-inset);
+      background-image: radial-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+      background-size: 20px 20px;
+      overflow: hidden;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .d3-canvas-wrap.is-panning {
+      cursor: grabbing;
+    }
+
+    .d3-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      direction: ltr;
+    }
+
+    .d3-link {
+      fill: none;
+      stroke: #3A4356;
+      stroke-width: 1.75px;
+      transition: stroke var(--transition), opacity var(--transition);
+    }
+
+    .d3-link.is-dimmed {
+      opacity: 0.35;
+    }
+
+    .d3-node {
+      cursor: pointer;
+    }
+
+    .d3-node-circle {
+      stroke-width: 2.5px;
+      transition: r var(--transition), stroke-width var(--transition), filter var(--transition);
+    }
+
+    .d3-node:hover .d3-node-circle {
+      stroke-width: 3.5px;
+    }
+
+    .d3-node.is-selected .d3-node-circle {
+      stroke: var(--teal) !important;
+      stroke-width: 4px;
+    }
+
+    .d3-node.is-dimmed {
+      opacity: 0.4;
+    }
+
+    .d3-node-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      fill: var(--text);
+      paint-order: stroke;
+      stroke: var(--surface-inset);
+      stroke-width: 4px;
+      stroke-linejoin: round;
+      direction: ltr;
+      unicode-bidi: plaintext;
+    }
+
+    .d3-node-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      fill: #081214;
+      pointer-events: none;
+    }
+
+    .d3-tooltip {
+      position: absolute;
+      z-index: 15;
+      pointer-events: none;
+      background-color: var(--surface);
+      border: 1px solid var(--border-hover);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--text);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+      max-width: 260px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .d3-tooltip-name {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--teal);
+      overflow-wrap: anywhere;
+    }
+
+    .d3-tooltip-meta {
+      color: var(--text-secondary);
+      font-size: 11.5px;
+    }
+
+    .d3-pane-footer {
+      padding: 8px 14px;
+      border-top: 1px solid var(--border);
+      background-color: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .d3-legend {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .d3-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .d3-legend-swatch {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .d3-empty {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13.5px;
+    }
+
+    .node-card.is-highlighted {
+      border-color: var(--teal) !important;
+      box-shadow: 0 0 0 2px var(--teal-bg);
+    }
+
+    /* ============================================================
+       REAL TREE VISUALIZATION (NESTED UL / LI WITH ::before ::after)
+       ============================================================ */
+    .tree-container {
+      width: 100%;
+      min-width: 0;
+    }
+
+    ul.tree-root,
+    ul.tree-children {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    ul.tree-root {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    ul.tree-children {
+      position: relative;
+      padding-right: 28px;
+    }
+
+    /* Vertical stem descending directly from parent card to children group */
+    ul.tree-children::before {
+      content: "";
+      position: absolute;
+      right: 12px;
+      top: 0;
+      height: 12px;
+      width: 2px;
+      background-color: var(--tree-line);
+    }
+
+    li.tree-node-item {
+      position: relative;
+    }
+
+    ul.tree-children > li.tree-node-item {
+      padding-top: 12px;
+    }
+
+    /* Vertical trunk segment connecting sibling nodes in RTL */
+    ul.tree-children > li.tree-node-item::before {
+      content: "";
+      position: absolute;
+      right: -16px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: var(--tree-line);
+    }
+
+    /* Terminate vertical trunk at the last child's branch point */
+    ul.tree-children > li.tree-node-item:last-child::before {
+      bottom: auto;
+      height: 36px;
+    }
+
+    /* Horizontal branch line from vertical trunk to child card */
+    ul.tree-children > li.tree-node-item::after {
+      content: "";
+      position: absolute;
+      right: -16px;
+      top: 35px;
+      width: 16px;
+      height: 2px;
+      background-color: var(--tree-line);
+    }
+
+    /* Branching dot at the junction on child nodes */
+    ul.tree-children > li.tree-node-item > .node-card::before {
+      content: "";
+      position: absolute;
+      right: -21px;
+      top: 18px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--node-dot, var(--teal));
+      border: 2px solid var(--bg);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* Node Card */
+    .node-card {
+      position: relative;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color var(--transition), background-color var(--transition);
+    }
+
+    .node-card:hover {
+      border-color: var(--border-hover);
+    }
+
+    .node-card[data-status="red"] {
+      --node-dot: var(--red);
+      border-color: var(--red-border);
+    }
+
+    .node-card[data-status="yellow"] {
+      --node-dot: var(--yellow);
+    }
+
+    .node-card[data-status="green"] {
+      --node-dot: var(--green);
+    }
+
+    .node-card[data-status="gray"] {
+      --node-dot: var(--gray);
+    }
+
+    .node-card.is-context-ancestor {
+      opacity: 0.72;
+    }
+
+    .node-card.is-context-ancestor:hover {
+      opacity: 1;
+    }
+
+    .node-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .node-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1 1 200px;
+    }
+
+    .collapse-btn {
+      min-width: 34px;
+      min-height: 34px;
+      padding: 0 7px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background-color: var(--surface-inset);
+      color: var(--teal);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      flex-shrink: 0;
+      transition: background-color var(--transition), border-color var(--transition);
+    }
+
+    .collapse-btn:hover {
+      background-color: var(--surface-elevated);
+      border-color: var(--teal-border);
+    }
+
+    .node-globe {
+      font-size: 17px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .node-name {
+      font-family: var(--font-mono);
+      font-size: 15.5px;
+      font-weight: 700;
+      color: var(--text);
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .node-header-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .node-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+    }
+
+    .node-meta-sep {
+      color: var(--text-muted);
+    }
+
+    .parent-ref {
+      font-family: var(--font-mono);
+      color: var(--teal);
+      font-weight: 600;
+    }
+
+    /* Node Controls Row */
+    .node-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 4px;
+    }
+
+    .node-selectors {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .status-select,
+    .severity-select {
+      min-height: 36px;
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background-color: var(--surface-inset);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color var(--transition), background-color var(--transition);
+    }
+
+    .status-select[data-status="red"] {
+      color: #FCA5A5;
+      background-color: var(--red-bg);
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+
+    .status-select[data-status="yellow"] {
+      color: #FDE047;
+      background-color: var(--yellow-bg);
+      border-color: rgba(234, 179, 8, 0.35);
+    }
+
+    .status-select[data-status="green"] {
+      color: #86EFAC;
+      background-color: var(--green-bg);
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+
+    .status-select[data-status="gray"] {
+      color: #CBD5E1;
+      background-color: var(--gray-bg);
+      border-color: rgba(148, 163, 184, 0.3);
+    }
+
+    .severity-select {
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+    }
+
+    .severity-select[data-severity="Critical"] {
+      color: #FCA5A5;
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+
+    .severity-select[data-severity="High"] {
+      color: #FDBA74;
+      border-color: rgba(249, 115, 22, 0.35);
+    }
+
+    .severity-select[data-severity="Medium"] {
+      color: #FDE047;
+    }
+
+    .severity-select[data-severity="Low"] {
+      color: #94A3B8;
+    }
+
+    .node-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    /* Notes inside Node Card */
+    .node-notes {
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .note-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .note-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 10px;
+      background-color: var(--surface-inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+    }
+
+    .note-content-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .note-time {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 11px;
+      color: var(--text-muted);
+      direction: ltr;
+      text-align: right;
+    }
+
+    .note-text {
+      color: var(--text);
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .note-delete-btn {
+      min-width: 28px;
+      min-height: 28px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .note-delete-btn:hover {
+      color: var(--red);
+      background-color: var(--red-bg);
+    }
+
+    .inline-note-form {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .inline-note-input {
+      flex: 1 1 200px;
+      min-height: 38px;
+      padding: 7px 10px;
+      background-color: var(--surface-inset);
+      border: 1px solid var(--teal-border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13.5px;
+    }
+
+    .inline-note-input:focus {
+      outline: none;
+      border-color: var(--teal);
+    }
+
+    /* Empty State */
+    .empty-state {
+      background-color: var(--surface);
+      border: 1px dashed var(--border-hover);
+      border-radius: var(--radius-md);
+      padding: 40px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .empty-icon {
+      font-size: 36px;
+      line-height: 1;
+    }
+
+    .empty-title {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .empty-desc {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 420px;
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(8, 10, 14, 0.78);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background-color: var(--surface);
+      border: 1px solid var(--border-hover);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .modal-close {
+      min-width: 36px;
+      min-height: 36px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background-color: var(--surface-elevated);
+      color: var(--text);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .form-input,
+    .form-select {
+      width: 100%;
+      min-height: 42px;
+      padding: 8px 12px;
+      background-color: var(--surface-inset);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+      outline: none;
+      border-color: var(--teal);
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .form-error {
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background-color: var(--red-bg);
+      border: 1px solid var(--red-border);
+      color: #FCA5A5;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .modal-warning {
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background-color: var(--yellow-bg);
+      border: 1px solid rgba(234, 179, 8, 0.35);
+      color: #FDE047;
+      font-size: 13.5px;
+    }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 4px;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: calc(100vw - 40px);
+    }
+
+    .toast {
+      background-color: var(--surface-elevated);
+      border: 1px solid var(--border-hover);
+      color: var(--text);
+      padding: 11px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      font-weight: 600;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.45);
+      animation: toastIn 160ms ease-out;
+    }
+
+    .toast.toast-success {
+      border-color: rgba(34, 197, 94, 0.5);
+    }
+
+    .toast.toast-error {
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #FCA5A5;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 1099px) {
+      .tree-split-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .d3-pane {
+        position: static;
+        order: -1;
+        height: 360px;
+        min-height: 300px;
+        max-height: none;
+      }
+
+      .d3-pane.is-collapsed-mobile {
+        height: auto;
+        min-height: 0;
+      }
+
+      .d3-pane.is-collapsed-mobile .d3-canvas-wrap,
+      .d3-pane.is-collapsed-mobile .d3-pane-footer {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1023px) {
+      .workspace {
+        grid-template-columns: 1fr;
+        padding: 14px;
+        gap: 14px;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .mobile-project-bar {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .topbar-inner {
+        padding: 12px 14px;
+        gap: 10px;
+      }
+
+      .search-box {
+        order: 3;
+        flex: 1 1 100%;
+        max-width: 100%;
+      }
+
+      .topbar-actions {
+        order: 2;
+        gap: 6px;
+      }
+
+      .btn,
+      .btn-sm,
+      .select-control,
+      .status-select,
+      .severity-select,
+      .collapse-btn,
+      .filter-tab,
+      .search-input,
+      .form-input,
+      .form-select,
+      .d3-tool-btn {
+        min-height: 44px;
+      }
+
+      .stats-bar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .stat-cell {
+        border-left: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .stat-cell:nth-child(2n) {
+        border-left: none;
+      }
+
+      .stat-cell:nth-last-child(-n+2) {
+        border-bottom: none;
+      }
+
+      .form-row-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .workspace {
+        padding: 10px;
+      }
+
+      .topbar-inner {
+        padding: 10px 12px;
+      }
+
+      .brand-sub {
+        display: none;
+      }
+
+      .topbar-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .topbar-actions .btn-add-main {
+        flex: 1 1 auto;
+      }
+
+      ul.tree-children {
+        padding-right: 18px;
+      }
+
+      ul.tree-children::before {
+        right: 7px;
+      }
+
+      ul.tree-children > li.tree-node-item::before {
+        right: -11px;
+      }
+
+      ul.tree-children > li.tree-node-item::after {
+        right: -11px;
+        width: 11px;
+      }
+
+      ul.tree-children > li.tree-node-item > .node-card::before {
+        right: -16px;
+      }
+
+      .node-card {
+        padding: 12px;
+      }
+
+      .node-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .node-selectors,
+      .node-actions {
+        width: 100%;
+      }
+
+      .status-select,
+      .severity-select {
+        flex: 1 1 120px;
+      }
+
+      .node-actions .btn {
+        flex: 1 1 auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">🌳</span>
+        <span class="brand-title">Shajara</span>
+        <span class="brand-sub">شجرة الدومينات</span>
+      </div>
+
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="ابحث عن دومين أو Endpoint أو ملاحظة..."
+          aria-label="بحث في الشجرة"
+        />
+        <button type="button" id="searchClearBtn" class="search-clear hidden" title="مسح البحث" aria-label="مسح البحث">×</button>
+      </div>
+
+      <div class="topbar-actions">
+        <button type="button" id="exportBtn" class="btn">Export JSON</button>
+        <label for="importFileInput" class="btn" role="button" tabindex="0" id="importLabelBtn">Import JSON</label>
+        <input type="file" id="importFileInput" accept=".json,application/json" class="hidden" />
+        <button type="button" id="openAddNodeBtn" class="btn btn-primary btn-add-main">+ إضافة دومين / Endpoint</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- WORKSPACE -->
+  <div class="workspace">
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="sidebar" aria-label="المشاريع">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">المشاريع (الأهداف)</h2>
+        <button type="button" id="newProjectSidebarBtn" class="btn btn-sm">+ مشروع</button>
+      </div>
+
+      <ul id="projectListSidebar" class="project-list"></ul>
+
+      <hr class="sidebar-divider" />
+
+      <div class="sidebar-footer">
+        <button type="button" id="clearAllSidebarBtn" class="btn btn-danger">مسح الكل</button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-area">
+      <!-- MOBILE PROJECT SWITCHER -->
+      <section class="mobile-project-bar" aria-label="اختيار المشروع">
+        <div class="mobile-project-select-wrap">
+          <label for="mobileProjectSelect" class="form-label" style="white-space:nowrap;">المشروع:</label>
+          <select id="mobileProjectSelect" class="select-control" style="flex:1; min-width:0;"></select>
+        </div>
+        <button type="button" id="newProjectMobileBtn" class="btn btn-sm">+ مشروع</button>
+        <button type="button" id="clearAllMobileBtn" class="btn btn-sm btn-danger">مسح الكل</button>
+      </section>
+
+      <!-- PROJECT BANNER -->
+      <section class="project-banner">
+        <div class="project-heading-group">
+          <h1 id="activeProjectTitle" class="project-heading">WhiteBIT</h1>
+          <span id="activeProjectSubtitle" class="project-submeta"></span>
+        </div>
+        <div class="project-actions-inline">
+          <button type="button" id="renameProjectBtn" class="btn btn-sm">إعادة تسمية المشروع</button>
+          <button type="button" id="deleteProjectBtn" class="btn btn-sm btn-danger">حذف المشروع</button>
+        </div>
+      </section>
+
+      <!-- STATS BAR -->
+      <section class="stats-bar" aria-label="إحصائيات المشروع">
+        <div class="stat-cell stat-total">
+          <span class="stat-label">إجمالي النودز</span>
+          <span id="statTotal" class="stat-value">0</span>
+        </div>
+        <div class="stat-cell stat-red">
+          <span class="stat-label">🔴 لقيت ثغرة</span>
+          <span id="statRed" class="stat-value">0</span>
+        </div>
+        <div class="stat-cell stat-yellow">
+          <span class="stat-label">🟡 بجرب</span>
+          <span id="statYellow" class="stat-value">0</span>
+        </div>
+        <div class="stat-cell stat-green">
+          <span class="stat-label">🟢 نظيف</span>
+          <span id="statGreen" class="stat-value">0</span>
+        </div>
+      </section>
+
+      <!-- FILTER & TREE CONTROLS -->
+      <section class="toolbar" aria-label="تصفية الشجرة">
+        <div class="filter-tabs" role="tablist" aria-label="تصفية حسب الحالة">
+          <button type="button" class="filter-tab active" data-filter="all">الكل</button>
+          <button type="button" class="filter-tab" data-filter="red">🔴 ثغرة</button>
+          <button type="button" class="filter-tab" data-filter="yellow">🟡 بجرب</button>
+          <button type="button" class="filter-tab" data-filter="green">🟢 نظيف</button>
+          <button type="button" class="filter-tab" data-filter="gray">⚪ برا النطاق</button>
+        </div>
+
+        <div class="tree-controls">
+          <button type="button" id="expandAllBtn" class="btn btn-sm">توسيع الكل</button>
+          <button type="button" id="collapseAllBtn" class="btn btn-sm">طي الكل</button>
+        </div>
+      </section>
+
+      <!-- TREE + D3 SIDE PANE SPLIT -->
+      <div id="treeSplitLayout" class="tree-split-layout">
+        <section id="treeContainer" class="tree-container" aria-label="شجرة الدومينات"></section>
+
+        <aside id="d3TreePane" class="d3-pane" aria-label="المخطط المرئي للشجرة">
+          <div class="d3-pane-header">
+            <div class="d3-pane-title-wrap">
+              <h2 class="d3-pane-title">مخطط الشجرة التفاعلي</h2>
+              <span class="d3-pane-hint">D3 Tree</span>
+            </div>
+            <div class="d3-toolbar">
+              <button type="button" id="d3OrientBtn" class="d3-tool-btn" title="تبديل اتجاه الشجرة">أفقي</button>
+              <button type="button" id="d3ZoomInBtn" class="d3-tool-btn" title="تكبير" aria-label="تكبير">+</button>
+              <button type="button" id="d3ZoomOutBtn" class="d3-tool-btn" title="تصغير" aria-label="تصغير">−</button>
+              <button type="button" id="d3FitBtn" class="d3-tool-btn" title="ملاءمة الشجرة">ملاءمة</button>
+              <button type="button" id="d3ExpandPaneBtn" class="d3-tool-btn" title="تبديل عرض المساحة">توسيع</button>
+            </div>
+          </div>
+
+          <div id="d3CanvasWrap" class="d3-canvas-wrap">
+            <svg id="d3TreeSvg" class="d3-svg" role="img" aria-label="تمثيل مرئي تفاعلي لشجرة الدومينات"></svg>
+            <div id="d3Tooltip" class="d3-tooltip hidden"></div>
+            <div id="d3EmptyState" class="d3-empty hidden">لا توجد عقد لعرضها في المخطط</div>
+          </div>
+
+          <div class="d3-pane-footer">
+            <div class="d3-legend">
+              <span class="d3-legend-item"><span class="d3-legend-swatch" style="background:var(--red);"></span>ثغرة</span>
+              <span class="d3-legend-item"><span class="d3-legend-swatch" style="background:var(--yellow);"></span>بجرب</span>
+              <span class="d3-legend-item"><span class="d3-legend-swatch" style="background:var(--green);"></span>نظيف</span>
+              <span class="d3-legend-item"><span class="d3-legend-swatch" style="background:var(--gray);"></span>برا النطاق</span>
+            </div>
+            <span>انقر على عقدة للانتقال إليها · اسحب للتحريك</span>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <!-- ADD / EDIT NODE MODAL -->
+  <div id="nodeModalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="nodeModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="nodeModalTitle" class="modal-title">+ إضافة دومين / Endpoint</h2>
+        <button type="button" class="modal-close" id="closeNodeModalBtn" aria-label="إغلاق">×</button>
+      </div>
+
+      <form id="nodeForm" novalidate>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div id="nodeFormError" class="form-error hidden"></div>
+
+          <div class="form-group">
+            <label for="nodeNameInput" class="form-label">الاسم (دومين، سب دومين، أو Endpoint)</label>
+            <input
+              type="text"
+              id="nodeNameInput"
+              class="form-input ltr"
+              dir="ltr"
+              placeholder="مثال: api.whitebit.com أو /v2/trade/markets"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="nodeParentInput" class="form-label">الدومين الأب (اتركه فارغاً للدومين الرئيسي)</label>
+            <input
+              type="text"
+              id="nodeParentInput"
+              class="form-input ltr"
+              dir="ltr"
+              list="parentSuggestionsList"
+              placeholder="مثال: whitebit.com (مطابقة تامة أو فارغ)"
+            />
+            <datalist id="parentSuggestionsList"></datalist>
+            <span class="form-hint">يجب أن يكون الاسم مطابقاً تماماً لعقدة موجودة في المشروع الحالي، أو اتركه فارغاً لإنشاء جذر جديد.</span>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nodeStatusInput" class="form-label">الحالة</label>
+              <select id="nodeStatusInput" class="form-select">
+                <option value="yellow" selected>🟡 بجرب</option>
+                <option value="red">🔴 لقيت ثغرة</option>
+                <option value="green">🟢 نظيف</option>
+                <option value="gray">⚪ برا النطاق</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="nodeSeverityInput" class="form-label">الخطورة (Severity)</label>
+              <select id="nodeSeverityInput" class="form-select ltr" dir="ltr">
+                <option value="Critical">Critical</option>
+                <option value="High">High</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="nodeUrlInput" class="form-label">رابط مباشر (اختياري)</label>
+            <input
+              type="url"
+              id="nodeUrlInput"
+              class="form-input ltr"
+              dir="ltr"
+              placeholder="https://internal.whitebit.com/v2/trade/markets"
+            />
+          </div>
+
+          <div class="form-group" id="nodeInitialNoteGroup">
+            <label for="nodeNoteInput" class="form-label">ملاحظة أولية (اختياري)</label>
+            <input
+              type="text"
+              id="nodeNoteInput"
+              class="form-input"
+              placeholder="مثال: tried graph=1 got 500"
+            />
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn" id="cancelNodeModalBtn">إلغاء</button>
+            <button type="submit" class="btn btn-primary" id="saveNodeModalBtn">حفظ الإضافة</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PROJECT MODAL (CREATE / RENAME) -->
+  <div id="projectModalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="projectModalTitle" class="modal-title">مشروع جديد</h2>
+        <button type="button" class="modal-close" id="closeProjectModalBtn" aria-label="إغلاق">×</button>
+      </div>
+
+      <form id="projectForm" novalidate>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div id="projectFormError" class="form-error hidden"></div>
+          <div class="form-group">
+            <label for="projectNameInput" class="form-label">اسم المشروع / الهدف</label>
+            <input
+              type="text"
+              id="projectNameInput"
+              class="form-input"
+              placeholder="مثال: HackerOne Target أو Binance"
+              required
+            />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn" id="cancelProjectModalBtn">إلغاء</button>
+            <button type="submit" class="btn btn-primary" id="saveProjectModalBtn">حفظ</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CONFIRMATION MODAL (DELETE NODE / CLEAR ALL / DELETE PROJECT) -->
+  <div id="confirmModalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="confirmModalTitle" class="modal-title">تأكيد</h2>
+        <button type="button" class="modal-close" id="closeConfirmModalBtn" aria-label="إغلاق">×</button>
+      </div>
+      <div id="confirmModalWarning" class="modal-warning hidden"></div>
+      <p id="confirmModalMessage" style="margin:0; font-size:14px; color:var(--text-secondary);"></p>
+      <div class="modal-footer" id="confirmModalFooter">
+        <button type="button" class="btn" id="cancelConfirmModalBtn">إلغاء</button>
+        <button type="button" class="btn btn-danger" id="acceptConfirmModalBtn">تأكيد</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPORT STRATEGY MODAL (REPLACE VS MERGE) -->
+  <div id="importModalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="importModalTitle" class="modal-title">استيراد بيانات Shajara</h2>
+        <button type="button" class="modal-close" id="closeImportModalBtn" aria-label="إغلاق">×</button>
+      </div>
+      <p id="importModalSummary" style="margin:0; font-size:14px; color:var(--text-secondary);"></p>
+      <div class="modal-warning">
+        اختر طريقة الاستيراد: الاستبدال يحذف البيانات الحالية ويعوضها بالملف المستورد، أما الدمج فيضيف المشاريع والنودز الجديدة مع الحفاظ على عملك الحالي.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" id="cancelImportModalBtn">إلغاء</button>
+        <button type="button" class="btn" id="importMergeBtn">دمج مع الحالي</button>
+        <button type="button" class="btn btn-primary" id="importReplaceBtn">استبدال الكل</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOASTS -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- EMBEDDED COMPACT D3.JS ENGINE (hierarchy, tidy tree layout, linkHorizontal/Vertical, SVG selection) -->
+  <script>
+    (function (global) {
+      "use strict";
+
+      var SVG_NS = "http://www.w3.org/2000/svg";
+      var SVG_TAGS = {
+        svg: 1, g: 1, path: 1, circle: 1, rect: 1, line: 1, text: 1, tspan: 1, title: 1
+      };
+
+      function HierarchyNode(data) {
+        this.data = data;
+        this.depth = 0;
+        this.height = 0;
+        this.parent = null;
+        this.children = null;
+      }
+
+      HierarchyNode.prototype.each = function (callback) {
+        var queue = [this];
+        while (queue.length > 0) {
+          var node = queue.shift();
+          callback(node);
+          if (node.children) {
+            for (var i = 0; i < node.children.length; i++) {
+              queue.push(node.children[i]);
+            }
+          }
+        }
+        return this;
+      };
+
+      HierarchyNode.prototype.eachBefore = function (callback) {
+        var stack = [this];
+        while (stack.length > 0) {
+          var node = stack.pop();
+          callback(node);
+          if (node.children) {
+            for (var i = node.children.length - 1; i >= 0; i--) {
+              stack.push(node.children[i]);
+            }
+          }
+        }
+        return this;
+      };
+
+      HierarchyNode.prototype.eachAfter = function (callback) {
+        var stack = [this];
+        var visited = [];
+        while (stack.length > 0) {
+          var node = stack.pop();
+          visited.push(node);
+          if (node.children) {
+            for (var i = 0; i < node.children.length; i++) {
+              stack.push(node.children[i]);
+            }
+          }
+        }
+        for (var j = visited.length - 1; j >= 0; j--) {
+          callback(visited[j]);
+        }
+        return this;
+      };
+
+      HierarchyNode.prototype.descendants = function () {
+        var nodes = [];
+        this.each(function (n) { nodes.push(n); });
+        return nodes;
+      };
+
+      HierarchyNode.prototype.ancestors = function () {
+        var nodes = [];
+        var cur = this;
+        while (cur) {
+          nodes.push(cur);
+          cur = cur.parent;
+        }
+        return nodes;
+      };
+
+      HierarchyNode.prototype.leaves = function () {
+        var leaves = [];
+        this.eachBefore(function (n) {
+          if (!n.children || n.children.length === 0) leaves.push(n);
+        });
+        return leaves;
+      };
+
+      function hierarchy(data, childrenAccessor) {
+        var getChildren = childrenAccessor || function (d) { return d.children; };
+        var root = new HierarchyNode(data);
+        var stack = [root];
+
+        while (stack.length > 0) {
+          var node = stack.pop();
+          var rawKids = getChildren(node.data);
+          if (rawKids && rawKids.length > 0) {
+            node.children = [];
+            for (var i = 0; i < rawKids.length; i++) {
+              var child = new HierarchyNode(rawKids[i]);
+              child.parent = node;
+              child.depth = node.depth + 1;
+              node.children.push(child);
+            }
+            for (var j = node.children.length - 1; j >= 0; j--) {
+              stack.push(node.children[j]);
+            }
+          }
+        }
+
+        root.eachAfter(function (n) {
+          var maxH = 0;
+          if (n.children) {
+            for (var i = 0; i < n.children.length; i++) {
+              if (n.children[i].height + 1 > maxH) {
+                maxH = n.children[i].height + 1;
+              }
+            }
+          }
+          n.height = maxH;
+        });
+
+        return root;
+      }
+
+      function tree() {
+        var size = null;
+        var dx = 1;
+        var dy = 1;
+        var separation = function (a, b) { return a.parent === b.parent ? 1 : 2; };
+
+        function TreeNode(node, parent, depth, index) {
+          this.node = node;
+          this.parent = parent;
+          this.children = null;
+          this.A = null;
+          this.a = this;
+          this.z = depth;
+          this.c = 0;
+          this.s = 0;
+          this.m = 0;
+          this.x = 0;
+          this.t = null;
+          this.i = index;
+        }
+
+        function wrap(hNode, parentT, depth, index) {
+          var t = new TreeNode(hNode, parentT, depth, index);
+          if (hNode.children && hNode.children.length > 0) {
+            t.children = [];
+            for (var i = 0; i < hNode.children.length; i++) {
+              t.children.push(wrap(hNode.children[i], t, depth + 1, i));
+            }
+          }
+          return t;
+        }
+
+        function eachBeforeT(t, fn) {
+          var stack = [t];
+          while (stack.length > 0) {
+            var cur = stack.pop();
+            fn(cur);
+            if (cur.children) {
+              for (var i = cur.children.length - 1; i >= 0; i--) {
+                stack.push(cur.children[i]);
+              }
+            }
+          }
+        }
+
+        function nextLeft(v) {
+          return v.children ? v.children[0] : v.t;
+        }
+
+        function nextRight(v) {
+          return v.children ? v.children[v.children.length - 1] : v.t;
+        }
+
+        function moveSubtree(wl, wr, shift) {
+          var subtrees = wr.i - wl.i;
+          wr.c -= shift / subtrees;
+          wr.s += shift;
+          wl.c += shift / subtrees;
+          wr.x += shift;
+          wr.m += shift;
+        }
+
+        function executeShifts(v) {
+          var shift = 0;
+          var change = 0;
+          var children = v.children;
+          for (var i = children.length - 1; i >= 0; i--) {
+            var w = children[i];
+            w.x += shift;
+            w.m += shift;
+            change += w.c;
+            shift += w.s + change;
+          }
+        }
+
+        function ancestor(vil, v, defaultAncestor) {
+          return vil.a.parent === v.parent ? vil.a : defaultAncestor;
+        }
+
+        function apportion(v, defaultAncestor) {
+          var w = v.parent && v.i > 0 ? v.parent.children[v.i - 1] : null;
+          if (w) {
+            var vir = v;
+            var vor = v;
+            var vil = w;
+            var vol = v.parent.children[0];
+            var sir = v.m;
+            var sor = v.m;
+            var sil = vil.m;
+            var sol = vol.m;
+
+            while (nextRight(vil) && nextLeft(vir)) {
+              vil = nextRight(vil);
+              vir = nextLeft(vir);
+              vol = nextLeft(vol);
+              vor = nextRight(vor);
+              vor.a = v;
+              var shift = (vil.x + sil) - (vir.x + sir) + separation(vil.node, vir.node);
+              if (shift > 0) {
+                moveSubtree(ancestor(vil, v, defaultAncestor), v, shift);
+                sir += shift;
+                sor += shift;
+              }
+              sil += vil.m;
+              sir += vir.m;
+              sol += vol.m;
+              sor += vor.m;
+            }
+
+            if (nextRight(vil) && !nextRight(vor)) {
+              vor.t = nextRight(vil);
+              vor.m += sil - sor;
+            }
+            if (nextLeft(vir) && !nextLeft(vol)) {
+              vol.t = nextLeft(vir);
+              vol.m += sir - sol;
+              defaultAncestor = v;
+            }
+          }
+          return defaultAncestor;
+        }
+
+        function firstWalk(v) {
+          var children = v.children;
+          var w = v.parent && v.i > 0 ? v.parent.children[v.i - 1] : null;
+          if (children && children.length > 0) {
+            var defaultAncestor = children[0];
+            for (var i = 0; i < children.length; i++) {
+              firstWalk(children[i]);
+              defaultAncestor = apportion(children[i], defaultAncestor);
+            }
+            executeShifts(v);
+            var midpoint = 0.5 * (children[0].x + children[children.length - 1].x);
+            if (w) {
+              v.x = w.x + separation(v.node, w.node);
+              v.m = v.x - midpoint;
+            } else {
+              v.x = midpoint;
+            }
+          } else if (w) {
+            v.x = w.x + separation(v.node, w.node);
+          }
+        }
+
+        function secondWalk(v, m) {
+          v.x += m;
+          if (v.children) {
+            for (var i = 0; i < v.children.length; i++) {
+              secondWalk(v.children[i], m + v.m);
+            }
+          }
+        }
+
+        function layout(root) {
+          var rootT = wrap(root, null, 0, 0);
+          firstWalk(rootT);
+          secondWalk(rootT, -rootT.x);
+
+          if (size) {
+            var left = rootT, right = rootT, bottom = rootT;
+            eachBeforeT(rootT, function (n) {
+              if (n.x < left.x) left = n;
+              if (n.x > right.x) right = n;
+              if (n.z > bottom.z) bottom = n;
+            });
+            var s = left === right ? 1 : separation(left.node, right.node) / 2;
+            var tx = s - left.x;
+            var kx = size[0] / (right.x + s + tx);
+            var ky = size[1] / (bottom.z || 1);
+            eachBeforeT(rootT, function (n) {
+              n.node.x = (n.x + tx) * kx;
+              n.node.y = n.z * ky;
+            });
+          } else {
+            eachBeforeT(rootT, function (n) {
+              n.node.x = n.x * dx;
+              n.node.y = n.z * dy;
+            });
+          }
+
+          return root;
+        }
+
+        layout.size = function (s) {
+          if (!arguments.length) return size;
+          size = s ? [+s[0], +s[1]] : null;
+          return layout;
+        };
+
+        layout.nodeSize = function (s) {
+          if (!arguments.length) return size ? null : [dx, dy];
+          size = null;
+          dx = +s[0];
+          dy = +s[1];
+          return layout;
+        };
+
+        layout.separation = function (fn) {
+          if (!arguments.length) return separation;
+          separation = fn;
+          return layout;
+        };
+
+        return layout;
+      }
+
+      function linkHorizontal() {
+        var sourceFn = function (d) { return d.source; };
+        var targetFn = function (d) { return d.target; };
+        var xFn = function (d) { return d.x; };
+        var yFn = function (d) { return d.y; };
+
+        function gen(d) {
+          var s = sourceFn(d);
+          var t = targetFn(d);
+          var sx = xFn(s), sy = yFn(s);
+          var tx = xFn(t), ty = yFn(t);
+          var mx = (sx + tx) / 2;
+          return "M" + sx + "," + sy + "C" + mx + "," + sy + " " + mx + "," + ty + " " + tx + "," + ty;
+        }
+
+        gen.x = function (fn) { xFn = fn; return gen; };
+        gen.y = function (fn) { yFn = fn; return gen; };
+        gen.source = function (fn) { sourceFn = fn; return gen; };
+        gen.target = function (fn) { targetFn = fn; return gen; };
+        return gen;
+      }
+
+      function linkVertical() {
+        var sourceFn = function (d) { return d.source; };
+        var targetFn = function (d) { return d.target; };
+        var xFn = function (d) { return d.x; };
+        var yFn = function (d) { return d.y; };
+
+        function gen(d) {
+          var s = sourceFn(d);
+          var t = targetFn(d);
+          var sx = xFn(s), sy = yFn(s);
+          var tx = xFn(t), ty = yFn(t);
+          var my = (sy + ty) / 2;
+          return "M" + sx + "," + sy + "C" + sx + "," + my + " " + tx + "," + my + " " + tx + "," + ty;
+        }
+
+        gen.x = function (fn) { xFn = fn; return gen; };
+        gen.y = function (fn) { yFn = fn; return gen; };
+        gen.source = function (fn) { sourceFn = fn; return gen; };
+        gen.target = function (fn) { targetFn = fn; return gen; };
+        return gen;
+      }
+
+      function Selection(el) {
+        this._el = el;
+      }
+
+      Selection.prototype.node = function () {
+        return this._el;
+      };
+
+      Selection.prototype.append = function (tag) {
+        var child = SVG_TAGS[tag]
+          ? document.createElementNS(SVG_NS, tag)
+          : document.createElement(tag);
+        this._el.appendChild(child);
+        return new Selection(child);
+      };
+
+      Selection.prototype.attr = function (name, value) {
+        if (arguments.length < 2) return this._el.getAttribute(name);
+        if (value === null || value === undefined) {
+          this._el.removeAttribute(name);
+        } else {
+          this._el.setAttribute(name, String(value));
+        }
+        return this;
+      };
+
+      Selection.prototype.style = function (name, value) {
+        this._el.style[name] = String(value);
+        return this;
+      };
+
+      Selection.prototype.text = function (val) {
+        this._el.textContent = val === null || val === undefined ? "" : String(val);
+        return this;
+      };
+
+      Selection.prototype.classed = function (cls, on) {
+        if (on) this._el.classList.add(cls);
+        else this._el.classList.remove(cls);
+        return this;
+      };
+
+      Selection.prototype.on = function (type, handler) {
+        this._el.addEventListener(type, handler);
+        return this;
+      };
+
+      Selection.prototype.html = function (val) {
+        this._el.innerHTML = val;
+        return this;
+      };
+
+      function select(target) {
+        var el = typeof target === "string" ? document.querySelector(target) : target;
+        return new Selection(el);
+      }
+
+      global.d3 = {
+        hierarchy: hierarchy,
+        tree: tree,
+        linkHorizontal: linkHorizontal,
+        linkVertical: linkVertical,
+        select: select
+      };
+    })(window);
+  </script>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STORAGE_KEY = "shajara";
+      var VALID_STATUSES = ["red", "yellow", "green", "gray"];
+      var VALID_SEVERITIES = ["Critical", "High", "Medium", "Low"];
+
+      var STATUS_LABELS = {
+        yellow: "🟡 بجرب",
+        red: "🔴 لقيت ثغرة",
+        green: "🟢 نظيف",
+        gray: "⚪ برا النطاق"
+      };
+
+      var state = {
+        app: "Shajara",
+        version: 2,
+        activeProjectId: "",
+        projects: []
+      };
+
+      // UI transient state
+      var searchQuery = "";
+      var activeStatusFilter = "all";
+      var collapsedNodes = {}; // key: projectId + "::" + nodeId -> boolean
+      var openNoteComposerId = null;
+      var confirmCallback = null;
+      var pendingImportData = null;
+      var projectModalMode = "create"; // "create" | "rename"
+      var idCounter = 0;
+
+      // D3 Visual Tree state
+      var d3Orientation = "horizontal"; // "horizontal" | "vertical"
+      var d3Transform = { x: 40, y: 40, k: 1 };
+      var d3HasUserPanned = false;
+      var d3SelectedNodeId = null;
+      var d3LastBounds = null;
+      var d3ViewportG = null;
+
+      function nextId() {
+        idCounter += 1;
+        return Date.now() + idCounter;
+      }
+
+      function formatTimestamp(dateObj) {
+        var d = dateObj || new Date();
+        var yyyy = d.getFullYear();
+        var mm = String(d.getMonth() + 1).padStart(2, "0");
+        var dd = String(d.getDate()).padStart(2, "0");
+        var hh = String(d.getHours()).padStart(2, "0");
+        var min = String(d.getMinutes()).padStart(2, "0");
+        return yyyy + "-" + mm + "-" + dd + " " + hh + ":" + min;
+      }
+
+      function escapeHtml(str) {
+        if (str === null || str === undefined) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function sanitizeHttpUrl(rawUrl) {
+        if (!rawUrl || typeof rawUrl !== "string") return "";
+        var trimmed = rawUrl.trim();
+        if (!trimmed) return "";
+        if (/^https?:\/\//i.test(trimmed)) {
+          return trimmed;
+        }
+        return "";
+      }
+
+      function createDefaultData() {
+        var nowStr = formatTimestamp(new Date());
+        var base = Date.now();
+        return {
+          app: "Shajara",
+          version: 2,
+          activeProjectId: "proj_whitebit",
+          projects: [
+            {
+              id: "proj_whitebit",
+              name: "WhiteBIT",
+              nodes: [
+                {
+                  id: base + 1,
+                  name: "whitebit.com",
+                  parent: "",
+                  status: "green",
+                  severity: "Medium",
+                  notes: [],
+                  createdAt: nowStr,
+                  url: "https://whitebit.com"
+                },
+                {
+                  id: base + 2,
+                  name: "internal.whitebit.com",
+                  parent: "whitebit.com",
+                  status: "yellow",
+                  severity: "High",
+                  notes: [],
+                  createdAt: nowStr,
+                  url: "https://internal.whitebit.com"
+                },
+                {
+                  id: base + 3,
+                  name: "/v2/trade/markets",
+                  parent: "internal.whitebit.com",
+                  status: "red",
+                  severity: "Critical",
+                  notes: ["[" + nowStr + "] tried graph=1 got 500"],
+                  createdAt: nowStr,
+                  url: "https://internal.whitebit.com/v2/trade/markets"
+                },
+                {
+                  id: base + 4,
+                  name: "/v2/currencies/rates",
+                  parent: "internal.whitebit.com",
+                  status: "green",
+                  severity: "Low",
+                  notes: [],
+                  createdAt: nowStr,
+                  url: "https://internal.whitebit.com/v2/currencies/rates"
+                },
+                {
+                  id: base + 5,
+                  name: "cdn.whitebit.com",
+                  parent: "whitebit.com",
+                  status: "green",
+                  severity: "Low",
+                  notes: [],
+                  createdAt: nowStr,
+                  url: "https://cdn.whitebit.com"
+                }
+              ]
+            },
+            {
+              id: "proj_binance",
+              name: "Binance",
+              nodes: []
+            },
+            {
+              id: "proj_coinbase",
+              name: "Coinbase",
+              nodes: []
+            }
+          ]
+        };
+      }
+
+      function normalizeNode(raw) {
+        if (!raw || typeof raw !== "object" || typeof raw.name !== "string" || !raw.name.trim()) {
+          return null;
+        }
+        var status = VALID_STATUSES.indexOf(raw.status) !== -1 ? raw.status : "yellow";
+        var severity = VALID_SEVERITIES.indexOf(raw.severity) !== -1 ? raw.severity : "Medium";
+        var notes = Array.isArray(raw.notes)
+          ? raw.notes.filter(function (n) { return typeof n === "string" && n.trim().length > 0; })
+          : [];
+        return {
+          id: typeof raw.id === "number" && isFinite(raw.id) ? raw.id : nextId(),
+          name: raw.name.trim(),
+          parent: typeof raw.parent === "string" ? raw.parent.trim() : "",
+          status: status,
+          severity: severity,
+          notes: notes,
+          createdAt: typeof raw.createdAt === "string" && raw.createdAt.trim() ? raw.createdAt.trim() : formatTimestamp(new Date()),
+          url: sanitizeHttpUrl(raw.url || "")
+        };
+      }
+
+      function normalizeProject(raw, idx) {
+        if (!raw || typeof raw !== "object" || typeof raw.name !== "string" || !raw.name.trim()) {
+          return null;
+        }
+        var nodesRaw = Array.isArray(raw.nodes) ? raw.nodes : [];
+        var seenNames = {};
+        var cleanNodes = [];
+        for (var i = 0; i < nodesRaw.length; i++) {
+          var n = normalizeNode(nodesRaw[i]);
+          if (n && !seenNames[n.name]) {
+            seenNames[n.name] = true;
+            cleanNodes.push(n);
+          }
+        }
+        return {
+          id: typeof raw.id === "string" && raw.id.trim() ? raw.id.trim() : "proj_" + Date.now() + "_" + idx,
+          name: raw.name.trim(),
+          nodes: cleanNodes
+        };
+      }
+
+      function loadState() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            state = createDefaultData();
+            saveState();
+            return;
+          }
+          var parsed = JSON.parse(raw);
+          if (!parsed || !Array.isArray(parsed.projects) || parsed.projects.length === 0) {
+            state = createDefaultData();
+            saveState();
+            return;
+          }
+          var cleanProjects = [];
+          for (var i = 0; i < parsed.projects.length; i++) {
+            var p = normalizeProject(parsed.projects[i], i);
+            if (p) cleanProjects.push(p);
+          }
+          if (cleanProjects.length === 0) {
+            state = createDefaultData();
+            saveState();
+            return;
+          }
+          state.projects = cleanProjects;
+          var hasActive = cleanProjects.some(function (p) { return p.id === parsed.activeProjectId; });
+          state.activeProjectId = hasActive ? parsed.activeProjectId : cleanProjects[0].id;
+        } catch (err) {
+          state = createDefaultData();
+          saveState();
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            app: "Shajara",
+            version: 2,
+            activeProjectId: state.activeProjectId,
+            projects: state.projects
+          }));
+        } catch (err) {
+          showToast("تعذر الحفظ في التخزين المحلي (localStorage).", "error");
+        }
+      }
+
+      function getActiveProject() {
+        for (var i = 0; i < state.projects.length; i++) {
+          if (state.projects[i].id === state.activeProjectId) {
+            return state.projects[i];
+          }
+        }
+        return state.projects[0] || null;
+      }
+
+      function showToast(message, type) {
+        var container = document.getElementById("toastContainer");
+        var toast = document.createElement("div");
+        toast.className = "toast" + (type === "success" ? " toast-success" : type === "error" ? " toast-error" : "");
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(function () {
+          if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+          }
+        }, 3000);
+      }
+
+      /* ============================================================
+         TREE LOGIC & URL RESOLUTION
+         ============================================================ */
+      function buildChildrenMap(nodes) {
+        var byName = {};
+        var childrenMap = {};
+        var roots = [];
+
+        for (var i = 0; i < nodes.length; i++) {
+          byName[nodes[i].name] = nodes[i];
+          childrenMap[nodes[i].name] = [];
+        }
+
+        for (var j = 0; j < nodes.length; j++) {
+          var node = nodes[j];
+          if (node.parent && byName[node.parent] && node.parent !== node.name) {
+            childrenMap[node.parent].push(node);
+          } else {
+            roots.push(node);
+          }
+        }
+
+        return { byName: byName, childrenMap: childrenMap, roots: roots };
+      }
+
+      function resolveNodeLink(node, byName) {
+        if (node.url) {
+          var safe = sanitizeHttpUrl(node.url);
+          if (safe) return safe;
+        }
+        if (/^https?:\/\//i.test(node.name)) {
+          return node.name;
+        }
+        if (node.name.charAt(0) === "/") {
+          // Walk up parent chain to find nearest domain host
+          var cursor = node.parent ? byName[node.parent] : null;
+          var guard = 0;
+          while (cursor && guard < 20) {
+            if (cursor.url) {
+              var safeBase = sanitizeHttpUrl(cursor.url);
+              if (safeBase) {
+                return safeBase.replace(/\/+$/, "") + node.name;
+              }
+            }
+            if (cursor.name.charAt(0) !== "/" && cursor.name.indexOf(".") !== -1) {
+              return "https://" + cursor.name.replace(/\/+$/, "") + node.name;
+            }
+            cursor = cursor.parent ? byName[cursor.parent] : null;
+            guard += 1;
+          }
+          return "";
+        }
+        if (node.name.indexOf(".") !== -1) {
+          return "https://" + node.name;
+        }
+        return "";
+      }
+
+      function getDescendantNames(nodes, rootName) {
+        var map = buildChildrenMap(nodes).childrenMap;
+        var result = [];
+        var stack = [rootName];
+        var visited = {};
+        visited[rootName] = true;
+
+        while (stack.length > 0) {
+          var current = stack.pop();
+          var kids = map[current] || [];
+          for (var i = 0; i < kids.length; i++) {
+            var childName = kids[i].name;
+            if (!visited[childName]) {
+              visited[childName] = true;
+              result.push(childName);
+              stack.push(childName);
+            }
+          }
+        }
+        return result;
+      }
+
+      function computeFilterVisibility(roots, childrenMap) {
+        var q = searchQuery.trim().toLowerCase();
+        var statusFilter = activeStatusFilter;
+        var isFiltering = q.length > 0 || statusFilter !== "all";
+        var directMatch = {};
+        var visible = {};
+
+        function nodeMatches(node) {
+          var statusOk = statusFilter === "all" || node.status === statusFilter;
+          if (!statusOk) return false;
+          if (!q) return true;
+          if (node.name.toLowerCase().indexOf(q) !== -1) return true;
+          if (node.parent && node.parent.toLowerCase().indexOf(q) !== -1) return true;
+          for (var i = 0; i < node.notes.length; i++) {
+            if (node.notes[i].toLowerCase().indexOf(q) !== -1) return true;
+          }
+          return false;
+        }
+
+        function traverse(node) {
+          var selfOk = nodeMatches(node);
+          directMatch[node.name] = selfOk;
+          var kids = childrenMap[node.name] || [];
+          var childVisible = false;
+          for (var i = 0; i < kids.length; i++) {
+            if (traverse(kids[i])) {
+              childVisible = true;
+            }
+          }
+          var isVis = !isFiltering || selfOk || childVisible;
+          visible[node.name] = isVis;
+          return isVis;
+        }
+
+        for (var r = 0; r < roots.length; r++) {
+          traverse(roots[r]);
+        }
+
+        return {
+          isFiltering: isFiltering,
+          directMatch: directMatch,
+          visible: visible
+        };
+      }
+
+      function parseNoteEntry(rawNote) {
+        var m = rawNote.match(/^\[([^\]]+)\]\s*(.*)$/);
+        if (m) {
+          return { time: m[1], text: m[2] };
+        }
+        return { time: "", text: rawNote };
+      }
+
+      /* ============================================================
+         RENDERING
+         ============================================================ */
+      function renderAll() {
+        renderProjectsUI();
+        renderProjectHeaderAndStats();
+        renderTree();
+        renderD3Tree();
+        updateParentSuggestions();
+      }
+
+      function renderProjectsUI() {
+        var sidebarList = document.getElementById("projectListSidebar");
+        var mobileSelect = document.getElementById("mobileProjectSelect");
+        sidebarList.innerHTML = "";
+        mobileSelect.innerHTML = "";
+
+        for (var i = 0; i < state.projects.length; i++) {
+          var proj = state.projects[i];
+          var isActive = proj.id === state.activeProjectId;
+          var redCount = proj.nodes.filter(function (n) { return n.status === "red"; }).length;
+
+          // Sidebar item
+          var li = document.createElement("li");
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "project-item-btn" + (isActive ? " active" : "");
+          btn.setAttribute("data-project-id", proj.id);
+
+          var nameSpan = document.createElement("span");
+          nameSpan.className = "project-name-text";
+          nameSpan.textContent = proj.name;
+
+          var countSpan = document.createElement("span");
+          countSpan.className = "project-meta-count";
+          countSpan.textContent = redCount > 0
+            ? proj.nodes.length + " (" + redCount + "🔴)"
+            : String(proj.nodes.length);
+
+          btn.appendChild(nameSpan);
+          btn.appendChild(countSpan);
+          btn.addEventListener("click", (function (pid) {
+            return function () {
+              switchProject(pid);
+            };
+          })(proj.id));
+          li.appendChild(btn);
+          sidebarList.appendChild(li);
+
+          // Mobile select option
+          var opt = document.createElement("option");
+          opt.value = proj.id;
+          opt.textContent = proj.name + " (" + proj.nodes.length + ")";
+          if (isActive) opt.selected = true;
+          mobileSelect.appendChild(opt);
+        }
+      }
+
+      function renderProjectHeaderAndStats() {
+        var proj = getActiveProject();
+        var titleEl = document.getElementById("activeProjectTitle");
+        var subEl = document.getElementById("activeProjectSubtitle");
+        var statTotal = document.getElementById("statTotal");
+        var statRed = document.getElementById("statRed");
+        var statYellow = document.getElementById("statYellow");
+        var statGreen = document.getElementById("statGreen");
+
+        if (!proj) {
+          titleEl.textContent = "لا يوجد مشروع";
+          subEl.textContent = "";
+          statTotal.textContent = "0";
+          statRed.textContent = "0";
+          statYellow.textContent = "0";
+          statGreen.textContent = "0";
+          return;
+        }
+
+        titleEl.textContent = proj.name;
+        var rootCount = proj.nodes.filter(function (n) { return !n.parent; }).length;
+        subEl.textContent = rootCount + " دومين رئيسي · " + proj.nodes.length + " إجمالي";
+
+        var red = 0, yellow = 0, green = 0;
+        for (var i = 0; i < proj.nodes.length; i++) {
+          var s = proj.nodes[i].status;
+          if (s === "red") red += 1;
+          else if (s === "yellow") yellow += 1;
+          else if (s === "green") green += 1;
+        }
+
+        statTotal.textContent = String(proj.nodes.length);
+        statRed.textContent = String(red);
+        statYellow.textContent = String(yellow);
+        statGreen.textContent = String(green);
+      }
+
+      function renderTree() {
+        var container = document.getElementById("treeContainer");
+        container.innerHTML = "";
+        var proj = getActiveProject();
+
+        if (!proj || proj.nodes.length === 0) {
+          var emptyDiv = document.createElement("div");
+          emptyDiv.className = "empty-state";
+          emptyDiv.innerHTML =
+            '<div class="empty-icon" aria-hidden="true">🌳</div>' +
+            '<h2 class="empty-title">الشجرة فارغة في هذا المشروع</h2>' +
+            '<p class="empty-desc">ابدأ بإضافة الدومين الرئيسي (Root Domain) ثم فرّع منه السب دومينات ونقاط النهاية لتتبع الفحص والثغرات.</p>' +
+            '<button type="button" class="btn btn-primary" id="emptyAddNodeBtn">+ إضافة دومين / Endpoint</button>';
+          container.appendChild(emptyDiv);
+          var emptyBtn = document.getElementById("emptyAddNodeBtn");
+          if (emptyBtn) {
+            emptyBtn.addEventListener("click", function () { openNodeModal(""); });
+          }
+          return;
+        }
+
+        var mapData = buildChildrenMap(proj.nodes);
+        var filterResult = computeFilterVisibility(mapData.roots, mapData.childrenMap);
+
+        var visibleRoots = mapData.roots.filter(function (r) {
+          return filterResult.visible[r.name];
+        });
+
+        if (visibleRoots.length === 0) {
+          var noMatch = document.createElement("div");
+          noMatch.className = "empty-state";
+          noMatch.innerHTML =
+            '<div class="empty-icon" aria-hidden="true">🔍</div>' +
+            '<h2 class="empty-title">لا توجد نتائج مطابقة</h2>' +
+            '<p class="empty-desc">جرّب تغيير كلمة البحث أو إعادة ضبط فلتر الحالة لعرض كل الدومينات.</p>' +
+            '<button type="button" class="btn" id="resetFiltersBtn">إعادة ضبط الفلتر</button>';
+          container.appendChild(noMatch);
+          var resetBtn = document.getElementById("resetFiltersBtn");
+          if (resetBtn) {
+            resetBtn.addEventListener("click", resetFilters);
+          }
+          return;
+        }
+
+        var rootUl = document.createElement("ul");
+        rootUl.className = "tree-root";
+
+        for (var i = 0; i < visibleRoots.length; i++) {
+          rootUl.appendChild(createTreeItemElement(visibleRoots[i], proj, mapData, filterResult));
+        }
+
+        container.appendChild(rootUl);
+      }
+
+      function createTreeItemElement(node, proj, mapData, filterResult) {
+        var li = document.createElement("li");
+        li.className = "tree-node-item";
+
+        var allChildren = mapData.childrenMap[node.name] || [];
+        var visibleChildren = allChildren.filter(function (c) {
+          return filterResult.visible[c.name];
+        });
+        var hasChildren = visibleChildren.length > 0;
+        var collapseKey = proj.id + "::" + node.id;
+        var isCollapsed = !filterResult.isFiltering && Boolean(collapsedNodes[collapseKey]);
+
+        var card = document.createElement("article");
+        card.className = "node-card";
+        card.setAttribute("data-node-id", String(node.id));
+        card.setAttribute("data-status", node.status);
+        if (filterResult.isFiltering && !filterResult.directMatch[node.name]) {
+          card.classList.add("is-context-ancestor");
+        }
+
+        // 1. Header row
+        var header = document.createElement("div");
+        header.className = "node-header";
+
+        var titleWrap = document.createElement("div");
+        titleWrap.className = "node-title-wrap";
+
+        if (hasChildren) {
+          var toggleBtn = document.createElement("button");
+          toggleBtn.type = "button";
+          toggleBtn.className = "collapse-btn";
+          toggleBtn.setAttribute("aria-expanded", String(!isCollapsed));
+          toggleBtn.setAttribute("aria-label", isCollapsed ? "توسيع الفروع" : "طي الفروع");
+          toggleBtn.textContent = isCollapsed ? "▸ " + visibleChildren.length : "▾";
+          toggleBtn.addEventListener("click", function () {
+            collapsedNodes[collapseKey] = !collapsedNodes[collapseKey];
+            renderTree();
+          });
+          titleWrap.appendChild(toggleBtn);
+        }
+
+        var globe = document.createElement("span");
+        globe.className = "node-globe";
+        globe.setAttribute("aria-hidden", "true");
+        globe.textContent = "🌐";
+        titleWrap.appendChild(globe);
+
+        var nameSpan = document.createElement("span");
+        nameSpan.className = "node-name ltr";
+        nameSpan.setAttribute("dir", "ltr");
+        nameSpan.textContent = node.name;
+        titleWrap.appendChild(nameSpan);
+
+        header.appendChild(titleWrap);
+
+        var headerRight = document.createElement("div");
+        headerRight.className = "node-header-right";
+
+        var addChildBtn = document.createElement("button");
+        addChildBtn.type = "button";
+        addChildBtn.className = "btn btn-sm btn-ghost";
+        addChildBtn.textContent = "+ فرع";
+        addChildBtn.title = "إضافة فرع تابع لـ " + node.name;
+        addChildBtn.addEventListener("click", function () {
+          openNodeModal(node.name);
+        });
+        headerRight.appendChild(addChildBtn);
+
+        header.appendChild(headerRight);
+        card.appendChild(header);
+
+        // 2. Meta line (Parent + Created Date)
+        var meta = document.createElement("div");
+        meta.className = "node-meta";
+
+        var parentInfo = document.createElement("span");
+        if (!node.parent) {
+          parentInfo.textContent = "🌳 دومين رئيسي";
+        } else {
+          parentInfo.innerHTML = 'تابع لـ <span class="parent-ref ltr" dir="ltr">' + escapeHtml(node.parent) + "</span>";
+        }
+        meta.appendChild(parentInfo);
+
+        var sep = document.createElement("span");
+        sep.className = "node-meta-sep";
+        sep.setAttribute("aria-hidden", "true");
+        sep.textContent = "·";
+        meta.appendChild(sep);
+
+        var dateSpan = document.createElement("span");
+        dateSpan.className = "tabular";
+        dateSpan.setAttribute("dir", "ltr");
+        dateSpan.textContent = node.createdAt;
+        meta.appendChild(dateSpan);
+
+        card.appendChild(meta);
+
+        // 3. Controls row (Status + Severity + Buttons)
+        var controls = document.createElement("div");
+        controls.className = "node-controls";
+
+        var selectors = document.createElement("div");
+        selectors.className = "node-selectors";
+
+        // Status dropdown
+        var statusSelect = document.createElement("select");
+        statusSelect.className = "status-select";
+        statusSelect.setAttribute("data-status", node.status);
+        statusSelect.setAttribute("aria-label", "حالة " + node.name);
+        for (var sIdx = 0; sIdx < VALID_STATUSES.length; sIdx++) {
+          var st = VALID_STATUSES[sIdx];
+          var opt = document.createElement("option");
+          opt.value = st;
+          opt.textContent = STATUS_LABELS[st];
+          if (node.status === st) opt.selected = true;
+          statusSelect.appendChild(opt);
+        }
+        statusSelect.addEventListener("change", function (e) {
+          updateNodeStatus(node.id, e.target.value);
+        });
+        selectors.appendChild(statusSelect);
+
+        // Severity selector
+        var sevSelect = document.createElement("select");
+        sevSelect.className = "severity-select ltr";
+        sevSelect.setAttribute("dir", "ltr");
+        sevSelect.setAttribute("data-severity", node.severity);
+        sevSelect.setAttribute("aria-label", "خطورة " + node.name);
+        for (var vIdx = 0; vIdx < VALID_SEVERITIES.length; vIdx++) {
+          var sv = VALID_SEVERITIES[vIdx];
+          var svOpt = document.createElement("option");
+          svOpt.value = sv;
+          svOpt.textContent = sv;
+          if (node.severity === sv) svOpt.selected = true;
+          sevSelect.appendChild(svOpt);
+        }
+        sevSelect.addEventListener("change", function (e) {
+          updateNodeSeverity(node.id, e.target.value);
+        });
+        selectors.appendChild(sevSelect);
+
+        controls.appendChild(selectors);
+
+        var actions = document.createElement("div");
+        actions.className = "node-actions";
+
+        // [+ ملاحظة]
+        var addNoteBtn = document.createElement("button");
+        addNoteBtn.type = "button";
+        addNoteBtn.className = "btn btn-sm";
+        addNoteBtn.textContent = "+ ملاحظة";
+        addNoteBtn.addEventListener("click", function () {
+          openNoteComposerId = openNoteComposerId === node.id ? null : node.id;
+          renderTree();
+          if (openNoteComposerId === node.id) {
+            var inputEl = document.getElementById("noteInput_" + node.id);
+            if (inputEl) inputEl.focus();
+          }
+        });
+        actions.appendChild(addNoteBtn);
+
+        // [فتح الرابط]
+        var resolvedUrl = resolveNodeLink(node, mapData.byName);
+        if (resolvedUrl) {
+          var openLink = document.createElement("a");
+          openLink.className = "btn btn-sm";
+          openLink.href = resolvedUrl;
+          openLink.target = "_blank";
+          openLink.rel = "noopener noreferrer";
+          openLink.textContent = "فتح الرابط";
+          actions.appendChild(openLink);
+        } else {
+          var disabledLinkBtn = document.createElement("button");
+          disabledLinkBtn.type = "button";
+          disabledLinkBtn.className = "btn btn-sm";
+          disabledLinkBtn.textContent = "فتح الرابط";
+          disabledLinkBtn.addEventListener("click", function () {
+            showToast("أضف رابطاً مباشراً أو اربط النود بدومين رئيسي لفتح الرابط.", "error");
+          });
+          actions.appendChild(disabledLinkBtn);
+        }
+
+        // [حذف]
+        var deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "btn btn-sm btn-danger";
+        deleteBtn.textContent = "حذف";
+        deleteBtn.addEventListener("click", function () {
+          confirmDeleteNode(node);
+        });
+        actions.appendChild(deleteBtn);
+
+        controls.appendChild(actions);
+        card.appendChild(controls);
+
+        // 4. Notes list & inline note composer
+        var showNotesSection = node.notes.length > 0 || openNoteComposerId === node.id;
+        if (showNotesSection) {
+          var notesBox = document.createElement("div");
+          notesBox.className = "node-notes";
+
+          if (node.notes.length > 0) {
+            var noteUl = document.createElement("ul");
+            noteUl.className = "note-list";
+
+            for (var nIdx = 0; nIdx < node.notes.length; nIdx++) {
+              var parsedNote = parseNoteEntry(node.notes[nIdx]);
+              var noteLi = document.createElement("li");
+              noteLi.className = "note-item";
+
+              var noteWrap = document.createElement("div");
+              noteWrap.className = "note-content-wrap";
+
+              if (parsedNote.time) {
+                var timeEl = document.createElement("span");
+                timeEl.className = "note-time";
+                timeEl.textContent = parsedNote.time;
+                noteWrap.appendChild(timeEl);
+              }
+
+              var textEl = document.createElement("span");
+              textEl.className = "note-text";
+              textEl.setAttribute("dir", "auto");
+              textEl.textContent = parsedNote.text;
+              noteWrap.appendChild(textEl);
+
+              noteLi.appendChild(noteWrap);
+
+              var delNoteBtn = document.createElement("button");
+              delNoteBtn.type = "button";
+              delNoteBtn.className = "note-delete-btn";
+              delNoteBtn.textContent = "×";
+              delNoteBtn.title = "حذف الملاحظة";
+              delNoteBtn.setAttribute("aria-label", "حذف الملاحظة");
+              delNoteBtn.addEventListener("click", (function (targetNodeId, targetIdx) {
+                return function () {
+                  deleteNote(targetNodeId, targetIdx);
+                };
+              })(node.id, nIdx));
+              noteLi.appendChild(delNoteBtn);
+
+              noteUl.appendChild(noteLi);
+            }
+            notesBox.appendChild(noteUl);
+          }
+
+          if (openNoteComposerId === node.id) {
+            var noteForm = document.createElement("form");
+            noteForm.className = "inline-note-form";
+
+            var noteInput = document.createElement("input");
+            noteInput.type = "text";
+            noteInput.id = "noteInput_" + node.id;
+            noteInput.className = "inline-note-input";
+            noteInput.placeholder = "اكتب ملاحظتك هنا... (Enter للحفظ)";
+            noteInput.setAttribute("dir", "auto");
+
+            var saveNoteBtn = document.createElement("button");
+            saveNoteBtn.type = "submit";
+            saveNoteBtn.className = "btn btn-sm btn-primary";
+            saveNoteBtn.textContent = "حفظ";
+
+            var cancelNoteBtn = document.createElement("button");
+            cancelNoteBtn.type = "button";
+            cancelNoteBtn.className = "btn btn-sm";
+            cancelNoteBtn.textContent = "إلغاء";
+            cancelNoteBtn.addEventListener("click", function () {
+              openNoteComposerId = null;
+              renderTree();
+            });
+
+            noteForm.appendChild(noteInput);
+            noteForm.appendChild(saveNoteBtn);
+            noteForm.appendChild(cancelNoteBtn);
+
+            noteForm.addEventListener("submit", function (e) {
+              e.preventDefault();
+              var val = noteInput.value.trim();
+              if (!val) {
+                noteInput.focus();
+                return;
+              }
+              addNoteToNode(node.id, val);
+            });
+
+            notesBox.appendChild(noteForm);
+          }
+
+          card.appendChild(notesBox);
+        }
+
+        li.appendChild(card);
+
+        // 5. Render nested children UL if expanded
+        if (hasChildren && !isCollapsed) {
+          var childUl = document.createElement("ul");
+          childUl.className = "tree-children";
+          for (var cIdx = 0; cIdx < visibleChildren.length; cIdx++) {
+            childUl.appendChild(createTreeItemElement(visibleChildren[cIdx], proj, mapData, filterResult));
+          }
+          li.appendChild(childUl);
+        }
+
+        return li;
+      }
+
+      function updateParentSuggestions() {
+        var datalist = document.getElementById("parentSuggestionsList");
+        datalist.innerHTML = "";
+        var proj = getActiveProject();
+        if (!proj) return;
+        for (var i = 0; i < proj.nodes.length; i++) {
+          var opt = document.createElement("option");
+          opt.value = proj.nodes[i].name;
+          datalist.appendChild(opt);
+        }
+      }
+
+      /* ============================================================
+         MUTATIONS (AUTO-SAVE TO LOCALSTORAGE ON EVERY CHANGE)
+         ============================================================ */
+      function switchProject(projectId) {
+        state.activeProjectId = projectId;
+        openNoteComposerId = null;
+        d3SelectedNodeId = null;
+        d3HasUserPanned = false;
+        saveState();
+        renderAll();
+      }
+
+      function updateNodeStatus(nodeId, newStatus) {
+        if (VALID_STATUSES.indexOf(newStatus) === -1) return;
+        var proj = getActiveProject();
+        if (!proj) return;
+        for (var i = 0; i < proj.nodes.length; i++) {
+          if (proj.nodes[i].id === nodeId) {
+            proj.nodes[i].status = newStatus;
+            break;
+          }
+        }
+        saveState();
+        renderAll();
+      }
+
+      function updateNodeSeverity(nodeId, newSeverity) {
+        if (VALID_SEVERITIES.indexOf(newSeverity) === -1) return;
+        var proj = getActiveProject();
+        if (!proj) return;
+        for (var i = 0; i < proj.nodes.length; i++) {
+          if (proj.nodes[i].id === nodeId) {
+            proj.nodes[i].severity = newSeverity;
+            break;
+          }
+        }
+        saveState();
+        renderTree();
+        renderD3Tree();
+      }
+
+      function addNoteToNode(nodeId, text) {
+        var proj = getActiveProject();
+        if (!proj) return;
+        var stamped = "[" + formatTimestamp(new Date()) + "] " + text;
+        for (var i = 0; i < proj.nodes.length; i++) {
+          if (proj.nodes[i].id === nodeId) {
+            proj.nodes[i].notes.push(stamped);
+            break;
+          }
+        }
+        openNoteComposerId = null;
+        saveState();
+        renderTree();
+        renderD3Tree();
+        showToast("تمت إضافة الملاحظة.", "success");
+      }
+
+      function deleteNote(nodeId, noteIndex) {
+        var proj = getActiveProject();
+        if (!proj) return;
+        for (var i = 0; i < proj.nodes.length; i++) {
+          if (proj.nodes[i].id === nodeId) {
+            proj.nodes[i].notes.splice(noteIndex, 1);
+            break;
+          }
+        }
+        saveState();
+        renderTree();
+        renderD3Tree();
+      }
+
+      function confirmDeleteNode(node) {
+        var proj = getActiveProject();
+        if (!proj) return;
+        var descendants = getDescendantNames(proj.nodes, node.name);
+        var msg = 'هل تريد حذف "' + node.name + '"؟';
+        var warning = descendants.length > 0
+          ? "تنبيه: حذف هذه العقدة سيؤدي إلى حذف " + descendants.length + " من الفروع التابعة لها أيضاً."
+          : "";
+
+        openConfirmModal(
+          "حذف النود",
+          msg,
+          warning,
+          "حذف نهائي",
+          function () {
+            var toRemove = {};
+            toRemove[node.name] = true;
+            for (var i = 0; i < descendants.length; i++) {
+              toRemove[descendants[i]] = true;
+            }
+            proj.nodes = proj.nodes.filter(function (n) {
+              return !toRemove[n.name];
+            });
+            saveState();
+            renderAll();
+            showToast("تم حذف النود والفروع التابعة.", "success");
+          }
+        );
+      }
+
+      function resetFilters() {
+        searchQuery = "";
+        activeStatusFilter = "all";
+        var searchInput = document.getElementById("searchInput");
+        searchInput.value = "";
+        document.getElementById("searchClearBtn").classList.add("hidden");
+        var tabs = document.querySelectorAll(".filter-tab");
+        for (var i = 0; i < tabs.length; i++) {
+          tabs[i].classList.toggle("active", tabs[i].getAttribute("data-filter") === "all");
+        }
+        d3HasUserPanned = false;
+        renderTree();
+        renderD3Tree();
+      }
+
+      /* ============================================================
+         ADD NODE MODAL FLOW
+         ============================================================ */
+      function openNodeModal(prefillParent) {
+        var proj = getActiveProject();
+        if (!proj) {
+          showToast("أنشئ مشروعاً أولاً قبل إضافة دومين.", "error");
+          return;
+        }
+        var backdrop = document.getElementById("nodeModalBackdrop");
+        var form = document.getElementById("nodeForm");
+        var errorBox = document.getElementById("nodeFormError");
+        form.reset();
+        errorBox.classList.add("hidden");
+        errorBox.textContent = "";
+
+        document.getElementById("nodeParentInput").value = prefillParent || "";
+        document.getElementById("nodeStatusInput").value = "yellow";
+        document.getElementById("nodeSeverityInput").value = "Medium";
+        updateParentSuggestions();
+
+        backdrop.classList.remove("hidden");
+        document.getElementById("nodeNameInput").focus();
+      }
+
+      function closeNodeModal() {
+        document.getElementById("nodeModalBackdrop").classList.add("hidden");
+      }
+
+      function handleNodeFormSubmit(e) {
+        e.preventDefault();
+        var proj = getActiveProject();
+        if (!proj) return;
+
+        var errorBox = document.getElementById("nodeFormError");
+        var name = document.getElementById("nodeNameInput").value.trim();
+        var parent = document.getElementById("nodeParentInput").value.trim();
+        var status = document.getElementById("nodeStatusInput").value;
+        var severity = document.getElementById("nodeSeverityInput").value;
+        var rawUrl = document.getElementById("nodeUrlInput").value.trim();
+        var initialNote = document.getElementById("nodeNoteInput").value.trim();
+
+        if (!name) {
+          showNodeFormError("الرجاء إدخال اسم الدومين أو Endpoint.");
+          return;
+        }
+
+        // Duplicate check inside active project
+        var duplicate = proj.nodes.some(function (n) { return n.name === name; });
+        if (duplicate) {
+          showNodeFormError('النود "' + name + '" موجود بالفعل في هذا المشروع.');
+          return;
+        }
+
+        // Parent validation: exact match if provided
+        if (parent) {
+          var parentExists = proj.nodes.some(function (n) { return n.name === parent; });
+          if (!parentExists) {
+            showNodeFormError('الدومين الأب "' + parent + '" غير موجود في هذا المشروع. تأكد من المطابقة التامة أو اتركه فارغاً ليكون دومين رئيسي.');
+            return;
+          }
+          if (parent === name) {
+            showNodeFormError("لا يمكن أن يكون الدومين أباً لنفسه.");
+            return;
+          }
+        }
+
+        // Optional URL validation
+        var cleanUrl = "";
+        if (rawUrl) {
+          cleanUrl = sanitizeHttpUrl(rawUrl);
+          if (!cleanUrl) {
+            showNodeFormError("الرابط المباشر يجب أن يبدأ بـ http:// أو https://");
+            return;
+          }
+        }
+
+        var nowStr = formatTimestamp(new Date());
+        var newNode = {
+          id: nextId(),
+          name: name,
+          parent: parent,
+          status: VALID_STATUSES.indexOf(status) !== -1 ? status : "yellow",
+          severity: VALID_SEVERITIES.indexOf(severity) !== -1 ? severity : "Medium",
+          notes: initialNote ? ["[" + nowStr + "] " + initialNote] : [],
+          createdAt: nowStr,
+          url: cleanUrl
+        };
+
+        proj.nodes.push(newNode);
+        if (parent) {
+          // Ensure parent is expanded so the new child is immediately visible
+          for (var i = 0; i < proj.nodes.length; i++) {
+            if (proj.nodes[i].name === parent) {
+              delete collapsedNodes[proj.id + "::" + proj.nodes[i].id];
+              break;
+            }
+          }
+        }
+
+        saveState();
+        closeNodeModal();
+        renderAll();
+        showToast('تمت إضافة "' + name + '" بنجاح.', "success");
+      }
+
+      function showNodeFormError(msg) {
+        var errorBox = document.getElementById("nodeFormError");
+        errorBox.textContent = msg;
+        errorBox.classList.remove("hidden");
+      }
+
+      /* ============================================================
+         PROJECTS MODAL & ACTIONS
+         ============================================================ */
+      function openProjectModal(mode) {
+        projectModalMode = mode;
+        var backdrop = document.getElementById("projectModalBackdrop");
+        var titleEl = document.getElementById("projectModalTitle");
+        var inputEl = document.getElementById("projectNameInput");
+        var errEl = document.getElementById("projectFormError");
+
+        errEl.classList.add("hidden");
+        errEl.textContent = "";
+
+        if (mode === "rename") {
+          var proj = getActiveProject();
+          if (!proj) return;
+          titleEl.textContent = "إعادة تسمية المشروع";
+          inputEl.value = proj.name;
+        } else {
+          titleEl.textContent = "إنشاء مشروع جديد";
+          inputEl.value = "";
+        }
+
+        backdrop.classList.remove("hidden");
+        inputEl.focus();
+      }
+
+      function closeProjectModal() {
+        document.getElementById("projectModalBackdrop").classList.add("hidden");
+      }
+
+      function handleProjectFormSubmit(e) {
+        e.preventDefault();
+        var inputEl = document.getElementById("projectNameInput");
+        var errEl = document.getElementById("projectFormError");
+        var name = inputEl.value.trim();
+
+        if (!name) {
+          errEl.textContent = "الرجاء إدخال اسم المشروع.";
+          errEl.classList.remove("hidden");
+          return;
+        }
+
+        if (projectModalMode === "rename") {
+          var activeProj = getActiveProject();
+          if (activeProj) {
+            activeProj.name = name;
+            saveState();
+            closeProjectModal();
+            renderAll();
+            showToast("تم تعديل اسم المشروع.", "success");
+          }
+          return;
+        }
+
+        var newProj = {
+          id: "proj_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+          name: name,
+          nodes: []
+        };
+        state.projects.push(newProj);
+        state.activeProjectId = newProj.id;
+        saveState();
+        closeProjectModal();
+        renderAll();
+        showToast('تم إنشاء مشروع "' + name + '".', "success");
+      }
+
+      function handleDeleteActiveProject() {
+        var proj = getActiveProject();
+        if (!proj) return;
+        if (state.projects.length <= 1) {
+          showToast("يجب بقاء مشروع واحد على الأقل. يمكنك مسح النودز أو استخدام مسح الكل.", "error");
+          return;
+        }
+
+        openConfirmModal(
+          "حذف المشروع",
+          'هل تريد حذف مشروع "' + proj.name + '" وجميع الدومينات بداخله (' + proj.nodes.length + ')؟',
+          "سيتم حذف جميع بيانات هذا المشروع نهائياً.",
+          "حذف المشروع",
+          function () {
+            state.projects = state.projects.filter(function (p) { return p.id !== proj.id; });
+            state.activeProjectId = state.projects[0].id;
+            saveState();
+            renderAll();
+            showToast("تم حذف المشروع.", "success");
+          }
+        );
+      }
+
+      /* ============================================================
+         CLEAR ALL ("مسح الكل")
+         ============================================================ */
+      function handleClearAll() {
+        openConfirmModal(
+          "مسح جميع البيانات",
+          "هل أنت متأكد من رغبتك في مسح جميع المشاريع والدومينات والبدء من الصفر؟",
+          "⚠️ تحذير مهم: يُنصح بشدة بعمل Export JSON أولاً لحفظ نسخة احتياطية قبل المسح!",
+          "نعم، امسح الكل",
+          function () {
+            localStorage.removeItem(STORAGE_KEY);
+            collapsedNodes = {};
+            openNoteComposerId = null;
+            state = {
+              app: "Shajara",
+              version: 2,
+              activeProjectId: "proj_default_" + Date.now(),
+              projects: [
+                {
+                  id: "proj_default_" + Date.now(),
+                  name: "Target 1",
+                  nodes: []
+                }
+              ]
+            };
+            state.activeProjectId = state.projects[0].id;
+            saveState();
+            resetFilters();
+            renderAll();
+            showToast("تم مسح جميع البيانات.", "success");
+          }
+        );
+      }
+
+      /* ============================================================
+         EXPORT / IMPORT JSON
+         ============================================================ */
+      function handleExportJson() {
+        var payload = {
+          app: "Shajara",
+          version: 2,
+          exportedAt: new Date().toISOString(),
+          projects: state.projects
+        };
+        var jsonStr = JSON.stringify(payload, null, 2);
+        var blob = new Blob([jsonStr], { type: "application/json;charset=utf-8" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "shajara.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () {
+          URL.revokeObjectURL(url);
+        }, 1000);
+        showToast("تم تصدير ملف shajara.json بنجاح.", "success");
+      }
+
+      function handleImportFileChange(e) {
+        var file = e.target.files && e.target.files[0];
+        e.target.value = "";
+        if (!file) return;
+
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+          try {
+            var data = JSON.parse(String(ev.target.result || ""));
+            if (!data || typeof data !== "object" || data.app !== "Shajara" || !Array.isArray(data.projects)) {
+              showToast("ملف JSON غير صالح. تأكد أنه ملف مُصدّر من Shajara.", "error");
+              return;
+            }
+            var validatedProjects = [];
+            for (var i = 0; i < data.projects.length; i++) {
+              var p = normalizeProject(data.projects[i], i);
+              if (p) validatedProjects.push(p);
+            }
+            if (validatedProjects.length === 0) {
+              showToast("الملف لا يحتوي على مشاريع صالحة للاستيراد.", "error");
+              return;
+            }
+
+            pendingImportData = validatedProjects;
+            var totalNodes = validatedProjects.reduce(function (acc, p) { return acc + p.nodes.length; }, 0);
+            document.getElementById("importModalSummary").textContent =
+              "تمت قراءة " + validatedProjects.length + " مشروع و " + totalNodes + " نود من الملف بنجاح.";
+            document.getElementById("importModalBackdrop").classList.remove("hidden");
+          } catch (err) {
+            showToast("فشل قراءة الملف: صيغة JSON غير صحيحة.", "error");
+          }
+        };
+        reader.onerror = function () {
+          showToast("تعذر قراءة الملف من الجهاز.", "error");
+        };
+        reader.readAsText(file);
+      }
+
+      function executeImport(mode) {
+        if (!pendingImportData) return;
+
+        if (mode === "replace") {
+          state.projects = pendingImportData;
+          state.activeProjectId = state.projects[0].id;
+        } else {
+          // Merge mode
+          for (var i = 0; i < pendingImportData.length; i++) {
+            var impProj = pendingImportData[i];
+            var existingProj = null;
+            for (var j = 0; j < state.projects.length; j++) {
+              if (state.projects[j].id === impProj.id || state.projects[j].name === impProj.name) {
+                existingProj = state.projects[j];
+                break;
+              }
+            }
+            if (!existingProj) {
+              state.projects.push(impProj);
+            } else {
+              var existingNames = {};
+              for (var k = 0; k < existingProj.nodes.length; k++) {
+                existingNames[existingProj.nodes[k].name] = true;
+              }
+              for (var m = 0; m < impProj.nodes.length; m++) {
+                if (!existingNames[impProj.nodes[m].name]) {
+                  existingProj.nodes.push(impProj.nodes[m]);
+                  existingNames[impProj.nodes[m].name] = true;
+                }
+              }
+            }
+          }
+        }
+
+        pendingImportData = null;
+        document.getElementById("importModalBackdrop").classList.add("hidden");
+        saveState();
+        renderAll();
+        showToast("تم استيراد البيانات وحفظها.", "success");
+      }
+
+      /* ============================================================
+         CONFIRMATION MODAL HELPERS
+         ============================================================ */
+      function openConfirmModal(title, message, warning, acceptLabel, onAccept) {
+        document.getElementById("confirmModalTitle").textContent = title;
+        document.getElementById("confirmModalMessage").textContent = message;
+        var warnEl = document.getElementById("confirmModalWarning");
+        if (warning) {
+          warnEl.textContent = warning;
+          warnEl.classList.remove("hidden");
+        } else {
+          warnEl.textContent = "";
+          warnEl.classList.add("hidden");
+        }
+        document.getElementById("acceptConfirmModalBtn").textContent = acceptLabel || "تأكيد";
+        confirmCallback = onAccept;
+        document.getElementById("confirmModalBackdrop").classList.remove("hidden");
+      }
+
+      function closeConfirmModal() {
+        document.getElementById("confirmModalBackdrop").classList.add("hidden");
+        confirmCallback = null;
+      }
+
+      /* ============================================================
+         EXPAND / COLLAPSE ALL
+         ============================================================ */
+      function setAllCollapsed(collapsed) {
+        var proj = getActiveProject();
+        if (!proj) return;
+        var mapData = buildChildrenMap(proj.nodes);
+        for (var i = 0; i < proj.nodes.length; i++) {
+          var n = proj.nodes[i];
+          var key = proj.id + "::" + n.id;
+          if ((mapData.childrenMap[n.name] || []).length > 0) {
+            if (collapsed) {
+              collapsedNodes[key] = true;
+            } else {
+              delete collapsedNodes[key];
+            }
+          }
+        }
+        renderTree();
+        renderD3Tree();
+      }
+
+      /* ============================================================
+         D3 INTERACTIVE TREE VISUALIZATION (SIDE PANE)
+         ============================================================ */
+      var STATUS_COLORS = {
+        red: "#EF4444",
+        yellow: "#EAB308",
+        green: "#22C55E",
+        gray: "#94A3B8",
+        root: "#2DD4BF"
+      };
+
+      function buildD3HierarchyPayload(proj, mapData, filterResult) {
+        function buildNode(node) {
+          var kids = (mapData.childrenMap[node.name] || []).filter(function (c) {
+            return filterResult.visible[c.name];
+          });
+          var collapseKey = proj.id + "::" + node.id;
+          var isCollapsed = !filterResult.isFiltering && Boolean(collapsedNodes[collapseKey]);
+          return {
+            id: node.id,
+            name: node.name,
+            status: node.status,
+            severity: node.severity,
+            notesCount: node.notes.length,
+            isVirtual: false,
+            isCollapsed: isCollapsed,
+            hiddenChildrenCount: isCollapsed ? kids.length : 0,
+            isContextAncestor: filterResult.isFiltering && !filterResult.directMatch[node.name],
+            children: isCollapsed ? [] : kids.map(buildNode)
+          };
+        }
+
+        var visibleRoots = mapData.roots.filter(function (r) {
+          return filterResult.visible[r.name];
+        });
+
+        if (visibleRoots.length === 0) return null;
+        if (visibleRoots.length === 1) {
+          return buildNode(visibleRoots[0]);
+        }
+
+        return {
+          id: "virtual_project_root",
+          name: proj.name,
+          status: "root",
+          severity: "",
+          notesCount: 0,
+          isVirtual: true,
+          isCollapsed: false,
+          hiddenChildrenCount: 0,
+          isContextAncestor: false,
+          children: visibleRoots.map(buildNode)
+        };
+      }
+
+      function applyD3Transform() {
+        if (d3ViewportG) {
+          d3ViewportG.attr(
+            "transform",
+            "translate(" + d3Transform.x + "," + d3Transform.y + ") scale(" + d3Transform.k + ")"
+          );
+        }
+      }
+
+      function fitD3ToViewport() {
+        var wrap = document.getElementById("d3CanvasWrap");
+        if (!wrap || !d3LastBounds) return;
+        var rect = wrap.getBoundingClientRect();
+        var w = rect.width || 420;
+        var h = rect.height || 400;
+        var bw = Math.max(120, d3LastBounds.maxX - d3LastBounds.minX);
+        var bh = Math.max(120, d3LastBounds.maxY - d3LastBounds.minY);
+        var pad = 44;
+        var scale = Math.min((w - pad * 2) / bw, (h - pad * 2) / bh, 1.35);
+        scale = Math.max(0.28, scale);
+        var cx = (d3LastBounds.minX + d3LastBounds.maxX) / 2;
+        var cy = (d3LastBounds.minY + d3LastBounds.maxY) / 2;
+        d3Transform = {
+          k: scale,
+          x: w / 2 - cx * scale,
+          y: h / 2 - cy * scale
+        };
+        applyD3Transform();
+      }
+
+      function zoomD3By(factor) {
+        var wrap = document.getElementById("d3CanvasWrap");
+        if (!wrap) return;
+        var rect = wrap.getBoundingClientRect();
+        var cx = (rect.width || 400) / 2;
+        var cy = (rect.height || 400) / 2;
+        var nextK = Math.max(0.22, Math.min(2.8, d3Transform.k * factor));
+        var ratio = nextK / d3Transform.k;
+        d3Transform.x = cx - (cx - d3Transform.x) * ratio;
+        d3Transform.y = cy - (cy - d3Transform.y) * ratio;
+        d3Transform.k = nextK;
+        d3HasUserPanned = true;
+        applyD3Transform();
+      }
+
+      function focusNodeCardFromD3(nodeId) {
+        var proj = getActiveProject();
+        if (!proj) return;
+        d3SelectedNodeId = nodeId;
+
+        var mapData = buildChildrenMap(proj.nodes);
+        var targetNode = null;
+        for (var i = 0; i < proj.nodes.length; i++) {
+          if (proj.nodes[i].id === nodeId) {
+            targetNode = proj.nodes[i];
+            break;
+          }
+        }
+        if (!targetNode) return;
+
+        var cursor = targetNode.parent ? mapData.byName[targetNode.parent] : null;
+        var guard = 0;
+        var expandedAny = false;
+        while (cursor && guard < 20) {
+          var key = proj.id + "::" + cursor.id;
+          if (collapsedNodes[key]) {
+            delete collapsedNodes[key];
+            expandedAny = true;
+          }
+          cursor = cursor.parent ? mapData.byName[cursor.parent] : null;
+          guard += 1;
+        }
+        if (expandedAny) {
+          renderTree();
+        }
+
+        renderD3Tree();
+
+        var card = document.querySelector('.node-card[data-node-id="' + nodeId + '"]');
+        if (card) {
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+          card.classList.add("is-highlighted");
+          setTimeout(function () {
+            card.classList.remove("is-highlighted");
+          }, 1600);
+        }
+      }
+
+      function renderD3Tree() {
+        var svgEl = document.getElementById("d3TreeSvg");
+        var emptyEl = document.getElementById("d3EmptyState");
+        var tooltipEl = document.getElementById("d3Tooltip");
+        if (!svgEl || !window.d3) return;
+
+        svgEl.innerHTML = "";
+        tooltipEl.classList.add("hidden");
+
+        var proj = getActiveProject();
+        if (!proj || proj.nodes.length === 0) {
+          emptyEl.classList.remove("hidden");
+          d3ViewportG = null;
+          d3LastBounds = null;
+          return;
+        }
+
+        var mapData = buildChildrenMap(proj.nodes);
+        var filterResult = computeFilterVisibility(mapData.roots, mapData.childrenMap);
+        var payload = buildD3HierarchyPayload(proj, mapData, filterResult);
+
+        if (!payload) {
+          emptyEl.classList.remove("hidden");
+          d3ViewportG = null;
+          d3LastBounds = null;
+          return;
+        }
+        emptyEl.classList.add("hidden");
+
+        var root = window.d3.hierarchy(payload);
+        var isHorizontal = d3Orientation === "horizontal";
+
+        var treeBuilder = window.d3.tree()
+          .nodeSize(isHorizontal ? [46, 195] : [165, 92])
+          .separation(function (a, b) {
+            return a.parent === b.parent ? 1 : 1.3;
+          });
+
+        treeBuilder(root);
+
+        var nodes = root.descendants();
+        var links = [];
+        for (var i = 0; i < nodes.length; i++) {
+          if (nodes[i].parent) {
+            links.push({ source: nodes[i].parent, target: nodes[i] });
+          }
+        }
+
+        var getX = function (d) { return isHorizontal ? d.y : d.x; };
+        var getY = function (d) { return isHorizontal ? d.x : d.y; };
+
+        var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        for (var j = 0; j < nodes.length; j++) {
+          var px = getX(nodes[j]);
+          var py = getY(nodes[j]);
+          if (px < minX) minX = px;
+          if (px > maxX) maxX = px;
+          if (py < minY) minY = py;
+          if (py > maxY) maxY = py;
+        }
+        d3LastBounds = {
+          minX: minX - (isHorizontal ? 70 : 90),
+          maxX: maxX + (isHorizontal ? 175 : 90),
+          minY: minY - 36,
+          maxY: maxY + 46
+        };
+
+        var svg = window.d3.select(svgEl);
+        var viewport = svg.append("g").attr("class", "d3-viewport");
+        d3ViewportG = viewport;
+
+        var linksGroup = viewport.append("g").attr("class", "d3-links");
+        var nodesGroup = viewport.append("g").attr("class", "d3-nodes");
+
+        var linkGen = (isHorizontal ? window.d3.linkHorizontal() : window.d3.linkVertical())
+          .x(getX)
+          .y(getY);
+
+        for (var l = 0; l < links.length; l++) {
+          var linkData = links[l];
+          linksGroup.append("path")
+            .attr("class", "d3-link" + (linkData.target.data.isContextAncestor ? " is-dimmed" : ""))
+            .attr("d", linkGen(linkData));
+        }
+
+        for (var k = 0; k < nodes.length; k++) {
+          (function (d) {
+            var nx = getX(d);
+            var ny = getY(d);
+            var data = d.data;
+            var color = STATUS_COLORS[data.status] || STATUS_COLORS.yellow;
+            var isSelected = d3SelectedNodeId === data.id;
+
+            var g = nodesGroup.append("g")
+              .attr("class", "d3-node" + (isSelected ? " is-selected" : "") + (data.isContextAncestor ? " is-dimmed" : ""))
+              .attr("transform", "translate(" + nx + "," + ny + ")");
+
+            g.append("circle")
+              .attr("class", "d3-node-circle")
+              .attr("r", data.isVirtual ? 9 : (data.isCollapsed ? 10 : (d.children && d.children.length > 0 ? 8 : 6.5)))
+              .attr("fill", data.isCollapsed ? color : "#0F1115")
+              .attr("stroke", color);
+
+            if (data.isCollapsed && data.hiddenChildrenCount > 0) {
+              g.append("text")
+                .attr("class", "d3-node-badge")
+                .attr("text-anchor", "middle")
+                .attr("dy", "0.35em")
+                .text("+" + data.hiddenChildrenCount);
+            }
+
+            var displayLabel = data.name.length > 26 ? data.name.slice(0, 24) + "…" : data.name;
+            var labelText = g.append("text")
+              .attr("class", "d3-node-label");
+
+            if (isHorizontal) {
+              var hasKids = d.children && d.children.length > 0;
+              labelText
+                .attr("dy", "0.32em")
+                .attr("x", hasKids ? -13 : 13)
+                .attr("text-anchor", hasKids ? "end" : "start")
+                .text(displayLabel);
+            } else {
+              labelText
+                .attr("dy", (d.children && d.children.length > 0) ? -14 : 18)
+                .attr("x", 0)
+                .attr("text-anchor", "middle")
+                .text(displayLabel);
+            }
+
+            g.append("title").text(
+              data.name + (data.isVirtual ? "" : " (" + (STATUS_LABELS[data.status] || data.status) + ")")
+            );
+
+            g.on("mouseenter", function (ev) {
+              if (data.isVirtual) return;
+              var wrapRect = document.getElementById("d3CanvasWrap").getBoundingClientRect();
+              tooltipEl.innerHTML =
+                '<span class="d3-tooltip-name ltr" dir="ltr">' + escapeHtml(data.name) + '</span>' +
+                '<span class="d3-tooltip-meta">' + escapeHtml(STATUS_LABELS[data.status] || "") +
+                ' · ' + escapeHtml(data.severity) +
+                (data.notesCount > 0 ? ' · ' + data.notesCount + ' ملاحظة' : '') +
+                '</span>';
+              tooltipEl.classList.remove("hidden");
+              var tx = Math.min(wrapRect.width - 200, Math.max(8, ev.clientX - wrapRect.left + 12));
+              var ty = Math.min(wrapRect.height - 64, Math.max(8, ev.clientY - wrapRect.top - 10));
+              tooltipEl.style.left = tx + "px";
+              tooltipEl.style.top = ty + "px";
+            });
+
+            g.on("mouseleave", function () {
+              tooltipEl.classList.add("hidden");
+            });
+
+            g.on("click", function (ev) {
+              ev.stopPropagation();
+              if (!data.isVirtual) {
+                focusNodeCardFromD3(data.id);
+              }
+            });
+
+            g.on("dblclick", function (ev) {
+              ev.stopPropagation();
+              if (data.isVirtual) return;
+              var kids = mapData.childrenMap[data.name] || [];
+              if (kids.length > 0) {
+                var cKey = proj.id + "::" + data.id;
+                collapsedNodes[cKey] = !collapsedNodes[cKey];
+                renderTree();
+                renderD3Tree();
+              }
+            });
+          })(nodes[k]);
+        }
+
+        if (!d3HasUserPanned) {
+          fitD3ToViewport();
+        } else {
+          applyD3Transform();
+        }
+      }
+
+      function bindD3PanZoomEvents() {
+        var wrap = document.getElementById("d3CanvasWrap");
+        if (!wrap) return;
+
+        var isDragging = false;
+        var startX = 0;
+        var startY = 0;
+        var origTx = 0;
+        var origTy = 0;
+
+        wrap.addEventListener("pointerdown", function (e) {
+          if (e.target && e.target.closest && e.target.closest(".d3-node")) return;
+          isDragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          origTx = d3Transform.x;
+          origTy = d3Transform.y;
+          wrap.classList.add("is-panning");
+          if (wrap.setPointerCapture) {
+            try { wrap.setPointerCapture(e.pointerId); } catch (err) {}
+          }
+        });
+
+        wrap.addEventListener("pointermove", function (e) {
+          if (!isDragging) return;
+          d3HasUserPanned = true;
+          d3Transform.x = origTx + (e.clientX - startX);
+          d3Transform.y = origTy + (e.clientY - startY);
+          applyD3Transform();
+        });
+
+        function stopDrag(e) {
+          if (!isDragging) return;
+          isDragging = false;
+          wrap.classList.remove("is-panning");
+          if (wrap.releasePointerCapture) {
+            try { wrap.releasePointerCapture(e.pointerId); } catch (err) {}
+          }
+        }
+
+        wrap.addEventListener("pointerup", stopDrag);
+        wrap.addEventListener("pointercancel", stopDrag);
+
+        wrap.addEventListener("wheel", function (e) {
+          e.preventDefault();
+          var rect = wrap.getBoundingClientRect();
+          var mx = e.clientX - rect.left;
+          var my = e.clientY - rect.top;
+          var factor = e.deltaY < 0 ? 1.12 : 0.89;
+          var nextK = Math.max(0.22, Math.min(2.8, d3Transform.k * factor));
+          var ratio = nextK / d3Transform.k;
+          d3Transform.x = mx - (mx - d3Transform.x) * ratio;
+          d3Transform.y = my - (my - d3Transform.y) * ratio;
+          d3Transform.k = nextK;
+          d3HasUserPanned = true;
+          applyD3Transform();
+        }, { passive: false });
+
+        document.getElementById("d3ZoomInBtn").addEventListener("click", function () { zoomD3By(1.22); });
+        document.getElementById("d3ZoomOutBtn").addEventListener("click", function () { zoomD3By(0.82); });
+        document.getElementById("d3FitBtn").addEventListener("click", function () {
+          d3HasUserPanned = false;
+          fitD3ToViewport();
+        });
+        document.getElementById("d3OrientBtn").addEventListener("click", function () {
+          d3Orientation = d3Orientation === "horizontal" ? "vertical" : "horizontal";
+          this.textContent = d3Orientation === "horizontal" ? "أفقي" : "عمودي";
+          d3HasUserPanned = false;
+          renderD3Tree();
+        });
+        document.getElementById("d3ExpandPaneBtn").addEventListener("click", function () {
+          var split = document.getElementById("treeSplitLayout");
+          var expanded = split.classList.toggle("d3-expanded");
+          this.textContent = expanded ? "تصغير" : "توسيع";
+          this.classList.toggle("active", expanded);
+          d3HasUserPanned = false;
+          setTimeout(fitD3ToViewport, 40);
+        });
+
+        window.addEventListener("resize", function () {
+          if (!d3HasUserPanned) {
+            fitD3ToViewport();
+          }
+        });
+      }
+
+      /* ============================================================
+         EVENT BINDINGS & INIT
+         ============================================================ */
+      function bindEvents() {
+        // Search
+        var searchInput = document.getElementById("searchInput");
+        var searchClearBtn = document.getElementById("searchClearBtn");
+        searchInput.addEventListener("input", function (e) {
+          searchQuery = e.target.value;
+          searchClearBtn.classList.toggle("hidden", searchQuery.length === 0);
+          d3HasUserPanned = false;
+          renderTree();
+          renderD3Tree();
+        });
+        searchClearBtn.addEventListener("click", function () {
+          searchQuery = "";
+          searchInput.value = "";
+          searchClearBtn.classList.add("hidden");
+          d3HasUserPanned = false;
+          renderTree();
+          renderD3Tree();
+          searchInput.focus();
+        });
+
+        // Status filter tabs
+        var filterTabs = document.querySelectorAll(".filter-tab");
+        for (var i = 0; i < filterTabs.length; i++) {
+          filterTabs[i].addEventListener("click", function () {
+            activeStatusFilter = this.getAttribute("data-filter");
+            for (var j = 0; j < filterTabs.length; j++) {
+              filterTabs[j].classList.remove("active");
+            }
+            this.classList.add("active");
+            d3HasUserPanned = false;
+            renderTree();
+            renderD3Tree();
+          });
+        }
+
+        // Collapse button in nested tree also syncs D3
+        document.getElementById("treeContainer").addEventListener("click", function (e) {
+          if (e.target && e.target.closest && e.target.closest(".collapse-btn")) {
+            setTimeout(renderD3Tree, 0);
+          }
+        });
+
+        bindD3PanZoomEvents();
+
+        // Expand / Collapse all
+        document.getElementById("expandAllBtn").addEventListener("click", function () { setAllCollapsed(false); });
+        document.getElementById("collapseAllBtn").addEventListener("click", function () { setAllCollapsed(true); });
+
+        // Topbar actions
+        document.getElementById("exportBtn").addEventListener("click", handleExportJson);
+        document.getElementById("importFileInput").addEventListener("change", handleImportFileChange);
+        document.getElementById("importLabelBtn").addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            document.getElementById("importFileInput").click();
+          }
+        });
+        document.getElementById("openAddNodeBtn").addEventListener("click", function () { openNodeModal(""); });
+
+        // Projects actions
+        document.getElementById("newProjectSidebarBtn").addEventListener("click", function () { openProjectModal("create"); });
+        document.getElementById("newProjectMobileBtn").addEventListener("click", function () { openProjectModal("create"); });
+        document.getElementById("mobileProjectSelect").addEventListener("change", function (e) {
+          switchProject(e.target.value);
+        });
+        document.getElementById("renameProjectBtn").addEventListener("click", function () { openProjectModal("rename"); });
+        document.getElementById("deleteProjectBtn").addEventListener("click", handleDeleteActiveProject);
+        document.getElementById("clearAllSidebarBtn").addEventListener("click", handleClearAll);
+        document.getElementById("clearAllMobileBtn").addEventListener("click", handleClearAll);
+
+        // Node Modal
+        document.getElementById("nodeForm").addEventListener("submit", handleNodeFormSubmit);
+        document.getElementById("closeNodeModalBtn").addEventListener("click", closeNodeModal);
+        document.getElementById("cancelNodeModalBtn").addEventListener("click", closeNodeModal);
+        document.getElementById("nodeModalBackdrop").addEventListener("click", function (e) {
+          if (e.target === this) closeNodeModal();
+        });
+
+        // Project Modal
+        document.getElementById("projectForm").addEventListener("submit", handleProjectFormSubmit);
+        document.getElementById("closeProjectModalBtn").addEventListener("click", closeProjectModal);
+        document.getElementById("cancelProjectModalBtn").addEventListener("click", closeProjectModal);
+        document.getElementById("projectModalBackdrop").addEventListener("click", function (e) {
+          if (e.target === this) closeProjectModal();
+        });
+
+        // Confirm Modal
+        document.getElementById("closeConfirmModalBtn").addEventListener("click", closeConfirmModal);
+        document.getElementById("cancelConfirmModalBtn").addEventListener("click", closeConfirmModal);
+        document.getElementById("acceptConfirmModalBtn").addEventListener("click", function () {
+          var cb = confirmCallback;
+          closeConfirmModal();
+          if (typeof cb === "function") cb();
+        });
+        document.getElementById("confirmModalBackdrop").addEventListener("click", function (e) {
+          if (e.target === this) closeConfirmModal();
+        });
+
+        // Import Modal
+        document.getElementById("closeImportModalBtn").addEventListener("click", function () {
+          pendingImportData = null;
+          document.getElementById("importModalBackdrop").classList.add("hidden");
+        });
+        document.getElementById("cancelImportModalBtn").addEventListener("click", function () {
+          pendingImportData = null;
+          document.getElementById("importModalBackdrop").classList.add("hidden");
+        });
+        document.getElementById("importReplaceBtn").addEventListener("click", function () { executeImport("replace"); });
+        document.getElementById("importMergeBtn").addEventListener("click", function () { executeImport("merge"); });
+
+        // Escape key closes open modals
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") {
+            closeNodeModal();
+            closeProjectModal();
+            closeConfirmModal();
+            pendingImportData = null;
+            document.getElementById("importModalBackdrop").classList.add("hidden");
+          }
+        });
+      }
+
+      loadState();
+      bindEvents();
+      renderAll();
+    })();
+  </script>
+</body>
+</html>

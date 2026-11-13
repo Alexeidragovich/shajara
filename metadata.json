@@ -1,0 +1,6 @@
+{
+  "name": "Shajara - شجرة الدومينات",
+  "description": "أداة استطلاع وصيد ثغرات تعمل بدون إنترنت لتصوير الدومينات والسب دومينات ونقاط النهاية على شكل شجرة عائلية تفاعلية.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
